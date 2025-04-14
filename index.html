@@ -1,115 +1,171 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Snake Spiel</title>
-  <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #f0f0f0;
-    }
-
-    canvas {
-      border: 1px solid black;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #gameContainer {
+            text-align: center;
+        }
+        canvas {
+            border: 1px solid white;
+        }
+        #gameOverMessage {
+            font-size: 24px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        #restartButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #333;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #restartButton:hover {
+            background-color: #555;
+        }
+    </style>
 </head>
 <body>
-  <canvas id="gameCanvas" width="400" height="400"></canvas>
-  <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div id="gameOverMessage" style="display: none;">
+            <p>Game Over! <br> Deine Punktzahl: <span id="score"></span></p>
+        </div>
+        <button id="restartButton" style="display: none;" onclick="restartGame()">Neustarten</button>
+    </div>
+    
+    <script>
+        // Spiel-Parameter
+        let canvas = document.getElementById("gameCanvas");
+        let ctx = canvas.getContext("2d");
 
-    const grid = 20;
-    let snake = [{ x: 160, y: 160 }];
-    let food = { x: 80, y: 80 };
-    let direction = "RIGHT";
-    let score = 0;
+        let snake = [{ x: 10, y: 10 }];
+        let food = { x: 15, y: 15 };
+        let direction = "RIGHT";
+        let score = 0;
+        let speed = 100;  // Geschwindigkeit der Schlange (kann verändert werden)
+        let gameInterval;
 
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawSnake();
-      drawFood();
-      moveSnake();
-      checkCollision();
-      updateScore();
-    }
+        // Steuerung der Schlange
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
+            else if (event.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+            else if (event.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
+            else if (event.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+        });
 
-    function drawSnake() {
-      snake.forEach(segment => {
-        ctx.fillStyle = "green";
-        ctx.fillRect(segment.x, segment.y, grid, grid);
-      });
-    }
-
-    function drawFood() {
-      ctx.fillStyle = "red";
-      ctx.fillRect(food.x, food.y, grid, grid);
-    }
-
-    function moveSnake() {
-      const head = { ...snake[0] };
-
-      if (direction === "LEFT") head.x -= grid;
-      if (direction === "RIGHT") head.x += grid;
-      if (direction === "UP") head.y -= grid;
-      if (direction === "DOWN") head.y += grid;
-
-      snake.unshift(head);
-      if (head.x === food.x && head.y === food.y) {
-        score++;
-        food = generateFood();
-      } else {
-        snake.pop();
-      }
-    }
-
-    function checkCollision() {
-      const head = snake[0];
-
-      if (head.x < 0 || head.y < 0 || head.x >= canvas.width || head.y >= canvas.height) {
-        gameOver();
-      }
-
-      for (let i = 1; i < snake.length; i++) {
-        if (head.x === snake[i].x && head.y === snake[i].y) {
-          gameOver();
+        // Spiel starten
+        function startGame() {
+            score = 0;
+            snake = [{ x: 10, y: 10 }];
+            food = { x: 15, y: 15 };
+            direction = "RIGHT";
+            document.getElementById("gameOverMessage").style.display = "none";
+            document.getElementById("restartButton").style.display = "none";
+            gameInterval = setInterval(gameLoop, speed);
         }
-      }
-    }
 
-    function generateFood() {
-      const x = Math.floor(Math.random() * (canvas.width / grid)) * grid;
-      const y = Math.floor(Math.random() * (canvas.height / grid)) * grid;
-      return { x, y };
-    }
+        // Spiel Loop
+        function gameLoop() {
+            moveSnake();
+            if (checkCollision()) {
+                endGame();
+            } else {
+                draw();
+            }
+        }
 
-    function updateScore() {
-      ctx.fillStyle = "black";
-      ctx.font = "16px Arial";
-      ctx.fillText("Score: " + score, 10, 20);
-    }
+        // Schlange bewegen
+        function moveSnake() {
+            let head = { ...snake[0] };
+            if (direction === "UP") head.y--;
+            else if (direction === "DOWN") head.y++;
+            else if (direction === "LEFT") head.x--;
+            else if (direction === "RIGHT") head.x++;
 
-    function gameOver() {
-      alert("Game Over! Dein Score: " + score);
-      snake = [{ x: 160, y: 160 }];
-      score = 0;
-      direction = "RIGHT";
-    }
+            snake.unshift(head);
 
-    document.addEventListener("keydown", event => {
-      if (event.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
-      if (event.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
-      if (event.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
-      if (event.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
-    });
+            // Wenn die Schlange das Essen frisst
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                food = generateFood();
+            } else {
+                snake.pop();
+            }
+        }
 
-    setInterval(draw, 100);
-  </script>
+        // Kollision überprüfen
+        function checkCollision() {
+            let head = snake[0];
+
+            // Wandkollision (die Grenzen des Canvas berücksichtigen)
+            if (head.x < 0 || head.x >= canvas.width / 10 || head.y < 0 || head.y >= canvas.height / 10) return true;
+
+            // Selbstkollision
+            for (let i = 1; i < snake.length; i++) {
+                if (snake[i].x === head.x && snake[i].y === head.y) return true;
+            }
+
+            return false;
+        }
+
+        // Spiel beenden
+        function endGame() {
+            clearInterval(gameInterval);
+            document.getElementById("score").innerText = score;
+            document.getElementById("gameOverMessage").style.display = "block";
+            document.getElementById("restartButton").style.display = "inline-block";
+        }
+
+        // Spiel neu starten
+        function restartGame() {
+            startGame();
+        }
+
+        // Food generieren
+        function generateFood() {
+            let x = Math.floor(Math.random() * (canvas.width / 10));
+            let y = Math.floor(Math.random() * (canvas.height / 10));
+            return { x: x, y: y };
+        }
+
+        // Zeichnen
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Schlange zeichnen
+            snake.forEach((segment, index) => {
+                ctx.fillStyle = index === 0 ? "green" : "white";  // Kopf der Schlange grün
+                ctx.fillRect(segment.x * 10, segment.y * 10, 10, 10);
+            });
+
+            // Essen zeichnen
+            ctx.fillStyle = "red";
+            ctx.fillRect(food.x * 10, food.y * 10, 10, 10);
+
+            // Punktzahl anzeigen
+            ctx.fillStyle = "white";
+            ctx.font = "20px Arial";
+            ctx.fillText("Punkte: " + score, 10, 20);
+        }
+
+        // Spiel starten
+        startGame();
+    </script>
 </body>
 </html>
