@@ -4,8 +4,30 @@
   <meta charset="UTF-8" />
   <title>Snake Game</title>
   <style>
-    body { margin: 0; background: #111; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; font-family: sans-serif; }
-    canvas { background: #222; }
+    body {
+      margin: 0;
+      background: #111;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+      font-family: sans-serif;
+      position: relative;
+    }
+
+    canvas {
+      background: #222;
+      display: block;
+    }
+
+    #scoreboard {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 18px;
+    }
+
     #gameOverScreen {
       position: absolute;
       text-align: center;
@@ -14,6 +36,7 @@
       border-radius: 10px;
       display: none;
     }
+
     button {
       margin-top: 20px;
       padding: 10px 20px;
@@ -24,6 +47,7 @@
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
+  <div id="scoreboard">Score: 0</div>
   <div id="gameOverScreen">
     <h2>Game Over</h2>
     <button onclick="restartGame()">Erneut spielen</button>
@@ -35,20 +59,20 @@
     const canvasWidth = 600;
     const canvasHeight = 400;
     const speed = 100;
+    const scoreEl = document.getElementById("scoreboard");
 
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
 
-    let snake = [{ x: 150, y: 150 }];
-    let dx = gridSize, dy = 0;
-    let food = {};
-    let interval;
+    let snake, dx, dy, food, interval, score;
 
     function drawSnake() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       snake.forEach(s => {
+        ctx.beginPath();
+        ctx.arc(s.x + gridSize / 2, s.y + gridSize / 2, gridSize / 2, 0, Math.PI * 2);
         ctx.fillStyle = "lime";
-        ctx.fillRect(s.x, s.y, gridSize, gridSize);
+        ctx.fill();
       });
     }
 
@@ -72,6 +96,8 @@
       const head = { x: snake[0].x + dx, y: snake[0].y + dy };
       snake.unshift(head);
       if (head.x === food.x && head.y === food.y) {
+        score++;
+        updateScore();
         spawnFood();
       } else {
         snake.pop();
@@ -92,10 +118,17 @@
 
     function restartGame() {
       snake = [{ x: 150, y: 150 }];
-      dx = gridSize; dy = 0;
+      dx = gridSize;
+      dy = 0;
+      score = 0;
+      updateScore();
       document.getElementById("gameOverScreen").style.display = "none";
       spawnFood();
       interval = setInterval(gameLoop, speed);
+    }
+
+    function updateScore() {
+      scoreEl.textContent = "Score: " + score;
     }
 
     function gameLoop() {
