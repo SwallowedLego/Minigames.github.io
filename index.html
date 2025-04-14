@@ -75,16 +75,18 @@
     canvas.height = canvasHeight;
 
     let snake, dx, dy, food, score, gameLoop;
+    let isPaused = false;
+    let isInvincible = false;
 
     // Retrieve highscore from localStorage or initialize it
     let highscore = localStorage.getItem('highscore') || 0;
     highscoreDisplay.textContent = `Highscore: ${highscore}`;
 
     function drawSnake() {
-      snake.forEach(segment => {
+      snake.forEach((segment, index) => {
         ctx.beginPath();
         ctx.arc(segment.x + gridSize / 2, segment.y + gridSize / 2, gridSize / 2, 0, Math.PI * 2);
-        ctx.fillStyle = 'lime';
+        ctx.fillStyle = index === 0 ? 'white' : 'lime'; // Kopf wird weiß
         ctx.fill();
       });
     }
@@ -121,14 +123,22 @@
     function checkCollision() {
       const head = snake[0];
 
-      if (
-        head.x < 0 || head.y < 0 ||
-        head.x >= canvas.width || head.y >= canvas.height ||
-        snake.slice(1).some(seg => seg.x === head.x && seg.y === head.y)
-      ) {
-        clearInterval(gameLoop);
-        updateHighscore();
-        gameOverScreen.style.display = 'block';
+      if (!isInvincible) {
+        if (
+          head.x < 0 || head.y < 0 ||
+          head.x >= canvas.width || head.y >= canvas.height ||
+          snake.slice(1).some(seg => seg.x === head.x && seg.y === head.y)
+        ) {
+          clearInterval(gameLoop);
+          updateHighscore();
+          gameOverScreen.style.display = 'block';
+        }
+      } else {
+        // Stoppen an Wänden im Unbesiegbarkeitsmodus
+        if (head.x < 0 || head.y < 0 || head.x >= canvas.width || head.y >= canvas.height) {
+          dx = 0;
+          dy = 0; // Bewegung stoppen
+        }
       }
     }
 
@@ -141,6 +151,8 @@
     }
 
     function gameTick() {
+      if (isPaused) return; // Überspringen, wenn pausiert
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       moveSnake();
       checkCollision();
@@ -165,6 +177,8 @@
       if (e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = gridSize; }
       if (e.key === 'ArrowLeft' && dx === 0) { dx = -gridSize; dy = 0; }
       if (e.key === 'ArrowRight' && dx === 0) { dx = gridSize; dy = 0; }
+      if (e.key === 'p') { isPaused = !isPaused; } // Pause umschalten
+      if (e.key === 'i') { isInvincible = !isInvincible; } // Unbesiegbarkeit umschalten
     });
 
     restartGame();
