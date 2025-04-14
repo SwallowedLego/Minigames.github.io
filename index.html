@@ -20,12 +20,16 @@
       display: block;
     }
 
-    #score {
+    #score, #highscore {
       position: absolute;
       top: 15px;
       left: 20px;
       color: white;
       font-size: 20px;
+    }
+
+    #highscore {
+      top: 40px; /* Position highscore below the score */
     }
 
     #gameOverScreen {
@@ -49,6 +53,7 @@
 <body>
   <canvas id="gameCanvas"></canvas>
   <div id="score">Score: 0</div>
+  <div id="highscore">Highscore: 0</div>
   <div id="gameOverScreen">
     <h2>Game Over</h2>
     <button onclick="restartGame()">Erneut spielen</button>
@@ -58,6 +63,7 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const scoreDisplay = document.getElementById('score');
+    const highscoreDisplay = document.getElementById('highscore');
     const gameOverScreen = document.getElementById('gameOverScreen');
 
     const gridSize = 20;
@@ -69,6 +75,10 @@
     canvas.height = canvasHeight;
 
     let snake, dx, dy, food, score, gameLoop;
+
+    // Retrieve highscore from localStorage or initialize it
+    let highscore = localStorage.getItem('highscore') || 0;
+    highscoreDisplay.textContent = `Highscore: ${highscore}`;
 
     function drawSnake() {
       snake.forEach(segment => {
@@ -117,7 +127,16 @@
         snake.slice(1).some(seg => seg.x === head.x && seg.y === head.y)
       ) {
         clearInterval(gameLoop);
+        updateHighscore();
         gameOverScreen.style.display = 'block';
+      }
+    }
+
+    function updateHighscore() {
+      if (score > highscore) {
+        highscore = score;
+        localStorage.setItem('highscore', highscore); // Save new highscore in localStorage
+        highscoreDisplay.textContent = `Highscore: ${highscore}`; // Update the highscore display
       }
     }
 
@@ -147,57 +166,6 @@
       if (e.key === 'ArrowLeft' && dx === 0) { dx = -gridSize; dy = 0; }
       if (e.key === 'ArrowRight' && dx === 0) { dx = gridSize; dy = 0; }
     });
-
-    // Touchscreen swipe controls
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchEndX = 0;
-    let touchEndY = 0;
-
-    function handleTouchStart(event) {
-      const touch = event.touches[0];
-      touchStartX = touch.clientX;
-      touchStartY = touch.clientY;
-    }
-
-    function handleTouchMove(event) {
-      const touch = event.touches[0];
-      touchEndX = touch.clientX;
-      touchEndY = touch.clientY;
-    }
-
-    function handleTouchEnd() {
-      const deltaX = touchEndX - touchStartX;
-      const deltaY = touchEndY - touchStartY;
-
-      if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        // Horizontal swipe
-        if (deltaX > 0 && dx === 0) {
-          // Swipe right
-          dx = gridSize;
-          dy = 0;
-        } else if (deltaX < 0 && dx === 0) {
-          // Swipe left
-          dx = -gridSize;
-          dy = 0;
-        }
-      } else {
-        // Vertical swipe
-        if (deltaY > 0 && dy === 0) {
-          // Swipe down
-          dx = 0;
-          dy = gridSize;
-        } else if (deltaY < 0 && dy === 0) {
-          // Swipe up
-          dx = 0;
-          dy = -gridSize;
-        }
-      }
-    }
-
-    document.addEventListener('touchstart', handleTouchStart);
-    document.addEventListener('touchmove', handleTouchMove);
-    document.addEventListener('touchend', handleTouchEnd);
 
     restartGame();
   </script>
