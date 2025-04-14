@@ -1,44 +1,118 @@
-const gridSize = 15;
-const canvasWidth = 600;
-const canvasHeight = 400;
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Snake Game</title>
+  <style>
+    body { margin: 0; background: #111; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; font-family: sans-serif; }
+    canvas { background: #222; }
+    #gameOverScreen {
+      position: absolute;
+      text-align: center;
+      background: rgba(0,0,0,0.8);
+      padding: 30px;
+      border-radius: 10px;
+      display: none;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+  <div id="gameOverScreen">
+    <h2>Game Over</h2>
+    <button onclick="restartGame()">Erneut spielen</button>
+  </div>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const gridSize = 15;
+    const canvasWidth = 600;
+    const canvasHeight = 400;
+    const speed = 100;
 
-canvas.width = canvasWidth;
-canvas.height = canvasHeight;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
 
-function checkCollisions() {
-    if (snake[0].x < 0 || snake[0].x >= canvas.width || snake[0].y < 0 || snake[0].y >= canvas.height) {
-        gameOver();
+    let snake = [{ x: 150, y: 150 }];
+    let dx = gridSize, dy = 0;
+    let food = {};
+    let interval;
+
+    function drawSnake() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      snake.forEach(s => {
+        ctx.fillStyle = "lime";
+        ctx.fillRect(s.x, s.y, gridSize, gridSize);
+      });
     }
 
-    for (let i = 1; i < snake.length; i++) {
-        if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) {
-            gameOver();
-        }
+    function drawFood() {
+      ctx.beginPath();
+      ctx.arc(food.x + gridSize / 2, food.y + gridSize / 2, gridSize / 2, 0, Math.PI * 2);
+      ctx.fillStyle = "red";
+      ctx.fill();
     }
-}
 
-function spawnFood() {
-    let foodX, foodY;
-    do {
-        foodX = Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize;
-        foodY = Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize;
-    } while (isFoodOnSnake(foodX, foodY));
-
-    food = { x: foodX, y: foodY };
-}
-
-function isFoodOnSnake(x, y) {
-    for (let i = 0; i < snake.length; i++) {
-        if (snake[i].x === x && snake[i].y === y) {
-            return true;
-        }
+    function spawnFood() {
+      let x, y;
+      do {
+        x = Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize;
+        y = Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize;
+      } while (snake.some(s => s.x === x && s.y === y));
+      food = { x, y };
     }
-    return false;
-}
 
-function drawFood() {
-    ctx.beginPath();
-    ctx.arc(food.x + gridSize / 2, food.y + gridSize / 2, gridSize / 2, 0, Math.PI * 2);
-    ctx.fillStyle = 'red';
-    ctx.fill();
-}
+    function moveSnake() {
+      const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+      snake.unshift(head);
+      if (head.x === food.x && head.y === food.y) {
+        spawnFood();
+      } else {
+        snake.pop();
+      }
+    }
+
+    function checkCollision() {
+      const head = snake[0];
+      if (
+        head.x < 0 || head.x >= canvas.width ||
+        head.y < 0 || head.y >= canvas.height ||
+        snake.slice(1).some(s => s.x === head.x && s.y === head.y)
+      ) {
+        clearInterval(interval);
+        document.getElementById("gameOverScreen").style.display = "block";
+      }
+    }
+
+    function restartGame() {
+      snake = [{ x: 150, y: 150 }];
+      dx = gridSize; dy = 0;
+      document.getElementById("gameOverScreen").style.display = "none";
+      spawnFood();
+      interval = setInterval(gameLoop, speed);
+    }
+
+    function gameLoop() {
+      moveSnake();
+      checkCollision();
+      drawSnake();
+      drawFood();
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -gridSize; }
+      if (e.key === "ArrowDown" && dy === 0) { dx = 0; dy = gridSize; }
+      if (e.key === "ArrowLeft" && dx === 0) { dx = -gridSize; dy = 0; }
+      if (e.key === "ArrowRight" && dx === 0) { dx = gridSize; dy = 0; }
+    });
+
+    restartGame();
+  </script>
+</body>
+</html>
