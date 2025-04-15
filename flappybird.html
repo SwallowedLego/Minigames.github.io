@@ -92,7 +92,7 @@
 
     const pipes = [];
     const pipeWidth = 50;
-    const pipeGap = 135;
+    const pipeGap = 120;
     const pipeSpeed = 2;
 
     let score = 0;
@@ -189,26 +189,26 @@
       startGameWithCountdown();
     }
 
-function startGameWithCountdown() {
-  const countdownNumbers = ['3', '2', '1', 'Go!'];
-  let currentIndex = 0;
+    function startGameWithCountdown() {
+      const countdownNumbers = ['3', '2', '1', 'Go!'];
+      let currentIndex = 0;
 
-  countdownDisplay.style.display = 'block';
-  countdownDisplay.textContent = countdownNumbers[currentIndex];
-
-  function nextCountdown() {
-    currentIndex++;
-    if (currentIndex < countdownNumbers.length) {
+      countdownDisplay.style.display = 'block';
       countdownDisplay.textContent = countdownNumbers[currentIndex];
-      setTimeout(nextCountdown, 1000); // Show the next number after 1 second
-    } else {
-      countdownDisplay.style.display = 'none';
-      startGame(); // Start the game after the countdown finishes
-    }
-  }
 
-  setTimeout(nextCountdown, 1000); // Start the first transition after 1 second
-}
+      function nextCountdown() {
+        currentIndex++;
+        if (currentIndex < countdownNumbers.length) {
+          countdownDisplay.textContent = countdownNumbers[currentIndex];
+          setTimeout(nextCountdown, 1000); // Show the next number after 1 second
+        } else {
+          countdownDisplay.style.display = 'none';
+          startGame(); // Start the game after the countdown finishes
+        }
+      }
+
+      setTimeout(nextCountdown, 1000); // Start the first transition after 1 second
+    }
 
     function startGame() {
       gameStarted = true;
@@ -230,8 +230,15 @@ function startGameWithCountdown() {
       requestAnimationFrame(gameLoop);
     }
 
+    // Add both keyboard and touch support
     document.addEventListener('keydown', e => {
       if (e.key === ' ' && gameStarted && !isGameOver) {
+        bird.dy = lift;
+      }
+    });
+
+    document.addEventListener('touchstart', e => {
+      if (gameStarted && !isGameOver) {
         bird.dy = lift;
       }
     });
