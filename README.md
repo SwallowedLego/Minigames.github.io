@@ -1,3 +1,3 @@
 # SnakeGame.github.io
 
-A lil Snake Game i made
+A lil Game Website i made with a little coding help from CoPilot
