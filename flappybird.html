@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flappy Bird</title>
   <style>
     body {
@@ -12,7 +12,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
       overflow: hidden;
     }
 
@@ -88,13 +88,16 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
+    const isMobile = window.innerWidth <= 768;
+    const pipeGap = isMobile ? 220 : 150; // Größerer vertikaler Abstand auf mobilen Geräten
+    const pipeSpeed = isMobile ? 1.5 : 2.5; // Langsamere Geschwindigkeit auf mobilen Geräten
+    const pipeIntervalTime = isMobile ? 3000 : 2000; // Längeres Intervall für neue Rohre auf mobilen Geräten
+
     const bird = { x: 50, y: 200, width: 20, height: 20, dy: 0 };
     const gravity = 0.5;
     const lift = -8;
     const pipes = [];
     const pipeWidth = 50;
-    const pipeGap = 150;
-    const pipeSpeed = 2;
 
     let score = 0;
     let highscore = localStorage.getItem('flappyHighscore') || 0;
@@ -107,64 +110,6 @@
     function createPipe() {
       const pipeY = Math.floor(Math.random() * (canvas.height - pipeGap));
       pipes.push({ x: canvas.width, y: pipeY });
-    }
-
-    function startGameWithCountdown() {
-      const countdownNumbers = ['3', '2', '1', 'Go!'];
-      let currentIndex = 0;
-
-      countdownDisplay.style.display = 'block';
-      countdownDisplay.textContent = countdownNumbers[currentIndex];
-
-      function nextCountdown() {
-        currentIndex++;
-        if (currentIndex < countdownNumbers.length) {
-          countdownDisplay.textContent = countdownNumbers[currentIndex];
-          setTimeout(nextCountdown, 1000);
-        } else {
-          countdownDisplay.style.display = 'none';
-          startGame();
-        }
-      }
-
-      setTimeout(nextCountdown, 1000);
-    }
-
-    function startGame() {
-      gameStarted = true;
-      isGameOver = false;
-
-      // Erstelle das erste Rohr
-      pipes.length = 0;
-      createPipe();
-
-      // Starte das Intervall für neue Rohre
-      clearInterval(pipeInterval);
-      pipeInterval = setInterval(createPipe, 2000);
-
-      // Starte den Spiel-Loop
-      gameLoop();
-    }
-
-    function gameLoop() {
-      if (isGameOver) return;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      moveBird();
-      movePipes();
-      drawBird();
-      drawPipes();
-
-      requestAnimationFrame(gameLoop);
-    }
-
-    function moveBird() {
-      bird.dy += gravity;
-      bird.y += bird.dy;
-
-      if (bird.y + bird.height > canvas.height || bird.y < 0) {
-        gameOver();
-      }
     }
 
     function movePipes() {
@@ -198,9 +143,18 @@
     function drawPipes() {
       ctx.fillStyle = 'green';
       pipes.forEach(pipe => {
-        ctx.fillRect(pipe.x, 0, pipeWidth, pipe.y); // Top pipe
-        ctx.fillRect(pipe.x, pipe.y + pipeGap, pipeWidth, canvas.height - (pipe.y + pipeGap)); // Bottom pipe
+        ctx.fillRect(pipe.x, 0, pipeWidth, pipe.y); // Oberes Rohr
+        ctx.fillRect(pipe.x, pipe.y + pipeGap, pipeWidth, canvas.height - (pipe.y + pipeGap)); // Unteres Rohr
       });
+    }
+
+    function moveBird() {
+      bird.dy += gravity;
+      bird.y += bird.dy;
+
+      if (bird.y + bird.height > canvas.height || bird.y < 0) {
+        gameOver();
+      }
     }
 
     function gameOver() {
@@ -219,13 +173,38 @@
       }
     }
 
+    function startGame() {
+      gameStarted = true;
+      isGameOver = false;
+
+      pipes.length = 0;
+      createPipe();
+
+      clearInterval(pipeInterval);
+      pipeInterval = setInterval(createPipe, pipeIntervalTime);
+
+      gameLoop();
+    }
+
+    function gameLoop() {
+      if (isGameOver) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      moveBird();
+      movePipes();
+      drawBird();
+      drawPipes();
+
+      requestAnimationFrame(gameLoop);
+    }
+
     function restartGame() {
       bird.y = canvas.height / 2;
       bird.dy = 0;
       score = 0;
       scoreDisplay.textContent = `Score: ${score}`;
       gameOverScreen.style.display = 'none';
-      startGameWithCountdown();
+      startGame();
     }
 
     document.addEventListener('keydown', e => {
@@ -240,7 +219,7 @@
       }
     });
 
-    startGameWithCountdown();
+    startGame();
   </script>
 </body>
 </html>
