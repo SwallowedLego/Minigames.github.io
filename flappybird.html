@@ -81,24 +81,21 @@
     const finalScoreDisplay = document.getElementById('finalScore');
     const countdownDisplay = document.getElementById('countdown');
 
-    // Dynamische Canvas-Größe
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     };
     window.addEventListener('resize', resizeCanvas);
-    resizeCanvas(); // Initiale Anpassung
-
-    const isMobile = window.innerWidth <= 768; // Prüfe, ob es sich um ein mobiles Gerät handelt
-    const pipeGap = isMobile ? 180 : 150; // Größerer Abstand auf mobilen Geräten
-    const pipeSpeed = isMobile ? 2 : 3; // Langsamere Geschwindigkeit auf mobilen Geräten
-    const pipeIntervalTime = 2000; // Konsistentes Intervall für alle Geräte (2 Sekunden)
+    resizeCanvas();
 
     const bird = { x: 50, y: 200, width: 20, height: 20, dy: 0 };
     const gravity = 0.5;
     const lift = -8;
+    const pipes = [];
+    const pipeWidth = 50;
+    const pipeGap = 150;
+    const pipeSpeed = 2;
 
-    let pipes = [];
     let score = 0;
     let highscore = localStorage.getItem('flappyHighscore') || 0;
     let isGameOver = false;
@@ -112,37 +109,38 @@
       pipes.push({ x: canvas.width, y: pipeY });
     }
 
-    function movePipes() {
-      pipes.forEach(pipe => {
-        pipe.x -= pipeSpeed;
+    function startGameWithCountdown() {
+      const countdownNumbers = ['3', '2', '1', 'Go!'];
+      let currentIndex = 0;
 
-        if (pipe.x + pipeWidth === bird.x) {
-          score++;
-          scoreDisplay.textContent = `Score: ${score}`;
+      countdownDisplay.style.display = 'block';
+      countdownDisplay.textContent = countdownNumbers[currentIndex];
+
+      function nextCountdown() {
+        currentIndex++;
+        if (currentIndex < countdownNumbers.length) {
+          countdownDisplay.textContent = countdownNumbers[currentIndex];
+          setTimeout(nextCountdown, 1000);
+        } else {
+          countdownDisplay.style.display = 'none';
+          startGame();
         }
-
-        if (
-          bird.x < pipe.x + pipeWidth &&
-          bird.x + bird.width > pipe.x &&
-          (bird.y < pipe.y || bird.y + bird.height > pipe.y + pipeGap)
-        ) {
-          gameOver();
-        }
-      });
-
-      if (pipes.length && pipes[0].x + pipeWidth < 0) {
-        pipes.shift();
       }
+
+      setTimeout(nextCountdown, 1000);
     }
 
     function startGame() {
       gameStarted = true;
+      isGameOver = false;
 
-      // Erstelle direkt ein erstes Rohr
+      // Erstelle das erste Rohr
+      pipes.length = 0;
       createPipe();
 
-      // Starte das Intervall für regelmäßig neue Rohre
-      pipeInterval = setInterval(createPipe, pipeIntervalTime);
+      // Starte das Intervall für neue Rohre
+      clearInterval(pipeInterval);
+      pipeInterval = setInterval(createPipe, 2000);
 
       // Starte den Spiel-Loop
       gameLoop();
@@ -166,6 +164,29 @@
 
       if (bird.y + bird.height > canvas.height || bird.y < 0) {
         gameOver();
+      }
+    }
+
+    function movePipes() {
+      pipes.forEach(pipe => {
+        pipe.x -= pipeSpeed;
+
+        if (pipe.x + pipeWidth === bird.x) {
+          score++;
+          scoreDisplay.textContent = `Score: ${score}`;
+        }
+
+        if (
+          bird.x < pipe.x + pipeWidth &&
+          bird.x + bird.width > pipe.x &&
+          (bird.y < pipe.y || bird.y + bird.height > pipe.y + pipeGap)
+        ) {
+          gameOver();
+        }
+      });
+
+      if (pipes.length && pipes[0].x + pipeWidth < 0) {
+        pipes.shift();
       }
     }
 
@@ -201,12 +222,10 @@
     function restartGame() {
       bird.y = canvas.height / 2;
       bird.dy = 0;
-      pipes = [];
       score = 0;
       scoreDisplay.textContent = `Score: ${score}`;
       gameOverScreen.style.display = 'none';
-      isGameOver = false;
-      startGame();
+      startGameWithCountdown();
     }
 
     document.addEventListener('keydown', e => {
@@ -221,7 +240,7 @@
       }
     });
 
-    startGame();
+    startGameWithCountdown();
   </script>
 </body>
 </html>
