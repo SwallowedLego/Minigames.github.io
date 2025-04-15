@@ -83,18 +83,16 @@
     const finalScoreDisplay = document.getElementById('finalScore');
     const countdownDisplay = document.getElementById('countdown');
 
-    // Dynamische Canvas-Größe basierend auf der Bildschirmgröße
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     };
     window.addEventListener('resize', resizeCanvas);
-    resizeCanvas(); // Initiale Größenanpassung
+    resizeCanvas();
 
     const bird = { x: 50, y: 200, width: 20, height: 20, dy: 0 };
     const gravity = 0.5;
     const lift = -8;
-
     const pipes = [];
     const pipeWidth = 50;
     const pipeGap = 120;
@@ -120,8 +118,8 @@
     function drawPipes() {
       ctx.fillStyle = 'green';
       pipes.forEach(pipe => {
-        ctx.fillRect(pipe.x, 0, pipeWidth, pipe.y); // Top pipe
-        ctx.fillRect(pipe.x, pipe.y + pipeGap, pipeWidth, canvas.height - (pipe.y + pipeGap)); // Bottom pipe
+        ctx.fillRect(pipe.x, 0, pipeWidth, pipe.y);
+        ctx.fillRect(pipe.x, pipe.y + pipeGap, pipeWidth, canvas.height - (pipe.y + pipeGap));
       });
     }
 
@@ -129,7 +127,6 @@
       bird.dy += gravity;
       bird.y += bird.dy;
 
-      // Check for collision with ground or ceiling
       if (bird.y + bird.height > canvas.height || bird.y < 0) {
         gameOver();
       }
@@ -139,7 +136,11 @@
       pipes.forEach(pipe => {
         pipe.x -= pipeSpeed;
 
-        // Check for collision with bird
+        if (pipe.x + pipeWidth === bird.x) {
+          score++;
+          scoreDisplay.textContent = `Score: ${score}`;
+        }
+
         if (
           bird.x < pipe.x + pipeWidth &&
           bird.x + bird.width > pipe.x &&
@@ -147,15 +148,8 @@
         ) {
           gameOver();
         }
-
-        // Increment score when the bird passes a pipe
-        if (pipe.x + pipeWidth === bird.x) {
-          score++;
-          scoreDisplay.textContent = `Score: ${score}`;
-        }
       });
 
-      // Remove pipes that are out of view
       if (pipes.length && pipes[0].x + pipeWidth < 0) {
         pipes.shift();
       }
@@ -199,14 +193,14 @@
         currentIndex++;
         if (currentIndex < countdownNumbers.length) {
           countdownDisplay.textContent = countdownNumbers[currentIndex];
-          setTimeout(nextCountdown, 1000); // Show the next number after 1 second
+          setTimeout(nextCountdown, 1000);
         } else {
           countdownDisplay.style.display = 'none';
-          startGame(); // Start the game after the countdown finishes
+          startGame();
         }
       }
 
-      setTimeout(nextCountdown, 1000); // Start the first transition after 1 second
+      setTimeout(nextCountdown, 1000);
     }
 
     function startGame() {
@@ -228,7 +222,6 @@
       requestAnimationFrame(gameLoop);
     }
 
-    // Add both keyboard and touch support
     document.addEventListener('keydown', e => {
       if (e.key === ' ' && gameStarted && !isGameOver) {
         bird.dy = lift;
@@ -241,7 +234,6 @@
       }
     });
 
-    // Start the game with a countdown
     startGameWithCountdown();
   </script>
 </body>
