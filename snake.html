@@ -78,6 +78,18 @@
     let highscore = localStorage.getItem('highscore') || 0;
     highscoreDisplay.textContent = `Highscore: ${highscore}`;
 
+    // Dynamische Canvas-Größe basierend auf der Fenstergröße
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    // Event-Listener für die Größenänderung des Fensters
+    window.addEventListener('resize', resizeCanvas);
+
+    // Canvas initial auf die Fenstergröße anpassen
+    resizeCanvas();
+
     function drawSnake() {
       snake.forEach((segment, index) => {
         ctx.beginPath();
@@ -169,14 +181,12 @@
       gameLoop = setInterval(gameTick, 100);
     }
 
-    // Event listener for keyboard input with prevention of 180-degree turns
     document.addEventListener('keydown', e => {
       if (e.key === 'p') {
         isPaused = !isPaused;
         return;
       }
 
-      // Prevent 180-degree turns by checking the current direction
       if (e.key === 'ArrowUp' && dy === 0) {
         dx = 0;
         dy = -gridSize;
@@ -189,33 +199,6 @@
       } else if (e.key === 'ArrowRight' && dx === 0) {
         dx = gridSize;
         dy = 0;
-      }
-    });
-
-    // Add touch support for mobile devices
-    document.addEventListener('touchstart', e => {
-      const touchX = e.touches[0].clientX;
-      const touchY = e.touches[0].clientY;
-
-      const head = snake[0];
-      if (Math.abs(touchX - head.x) > Math.abs(touchY - head.y)) {
-        // Horizontal swipe
-        if (touchX > head.x && dx === 0) {
-          dx = gridSize;
-          dy = 0;
-        } else if (touchX < head.x && dx === 0) {
-          dx = -gridSize;
-          dy = 0;
-        }
-      } else {
-        // Vertical swipe
-        if (touchY > head.y && dy === 0) {
-          dx = 0;
-          dy = gridSize;
-        } else if (touchY < head.y && dy === 0) {
-          dx = 0;
-          dy = -gridSize;
-        }
       }
     });
 
