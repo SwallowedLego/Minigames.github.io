@@ -92,10 +92,12 @@
     }
 
     function handleCellClick(index) {
-      if (!gameActive || cells[index]) return;
+      if (!gameActive || cells[index] || currentPlayer !== 'X') return; // Only allow player moves on their turn
 
+      // Player makes their move
       cells[index] = currentPlayer;
       updateBoard();
+
       if (checkWin()) {
         statusDisplay.textContent = `Spieler ${currentPlayer} gewinnt!`;
         gameActive = false;
@@ -106,17 +108,19 @@
         return;
       }
 
-      if (gameMode === '2p') {
-        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-        statusDisplay.textContent = `Spieler ${currentPlayer} ist am Zug`;
-      } else {
-        currentPlayer = 'O';
-        statusDisplay.textContent = `KI (${currentPlayer}) ist am Zug`;
-        setTimeout(() => makeAIMove(), 500);
-      }
+      // Switch to AI
+      currentPlayer = 'O';
+      statusDisplay.textContent = `KI (${currentPlayer}) ist am Zug`;
+
+      // Delay AI's move for better visual feedback
+      setTimeout(() => {
+        makeAIMove();
+      }, 500);
     }
 
     function makeAIMove() {
+      if (!gameActive || currentPlayer !== 'O') return; // Ensure AI only moves on its turn
+
       let move;
       if (gameMode === 'easy') {
         move = makeRandomMove();
@@ -125,7 +129,23 @@
       } else if (gameMode === 'impossible') {
         move = makeImpossibleMove();
       }
-      handleCellClick(move);
+
+      cells[move] = currentPlayer;
+      updateBoard();
+
+      if (checkWin()) {
+        statusDisplay.textContent = `KI (${currentPlayer}) gewinnt!`;
+        gameActive = false;
+        return;
+      } else if (!cells.includes(null)) {
+        statusDisplay.textContent = 'Unentschieden!';
+        gameActive = false;
+        return;
+      }
+
+      // Switch back to the player
+      currentPlayer = 'X';
+      statusDisplay.textContent = `Spieler ${currentPlayer} ist am Zug`;
     }
 
     function makeRandomMove() {
