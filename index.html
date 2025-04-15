@@ -56,6 +56,7 @@
   <div id="highscore">Highscore: 0</div>
   <div id="gameOverScreen">
     <h2>Game Over</h2>
+    <div id="finalScore"></div>
     <button onclick="restartGame()">Erneut spielen</button>
   </div>
 
@@ -65,6 +66,7 @@
     const scoreDisplay = document.getElementById('score');
     const highscoreDisplay = document.getElementById('highscore');
     const gameOverScreen = document.getElementById('gameOverScreen');
+    const finalScoreDisplay = document.getElementById('finalScore');
 
     const gridSize = 20;
     const canvasWidth = 600;
@@ -139,7 +141,7 @@
         ) {
           clearInterval(gameLoop);
           updateHighscore();
-          gameOverScreen.style.display = 'block';
+          showGameOverScreen(); // Zeige den Game-Over-Bildschirm
         }
       } else {
         // Stoppen an Wänden im Unbesiegbarkeitsmodus
@@ -156,6 +158,11 @@
         localStorage.setItem('highscore', highscore); // Save new highscore in localStorage
         highscoreDisplay.textContent = `Highscore: ${highscore}`; // Update the highscore display
       }
+    }
+
+    function showGameOverScreen() {
+      finalScoreDisplay.textContent = `Final Score: ${score}`; // Zeige den finalen Punktestand
+      gameOverScreen.style.display = 'block';
     }
 
     function gameTick() {
