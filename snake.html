@@ -19,8 +19,8 @@
     canvas {
       background-color: #222;
       display: block;
-      width: 100%; /* Passt sich der Breite des Bildschirms an */
-      height: auto; /* Dynamische Skalierung der Höhe */
+      width: 100%;
+      height: auto;
     }
 
     #score, #highscore {
@@ -32,7 +32,7 @@
     }
 
     #highscore {
-      top: 40px; /* Positioniert den Highscore unterhalb des Scores */
+      top: 40px;
     }
 
     #gameOverScreen {
@@ -71,19 +71,10 @@
     const gameOverScreen = document.getElementById('gameOverScreen');
     const finalScoreDisplay = document.getElementById('finalScore');
 
-    // Dynamische Canvas-Größe basierend auf der Bildschirmgröße
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas(); // Initiale Größenanpassung
-
     const gridSize = 20;
     let snake, dx, dy, food, score, gameLoop;
     let isPaused = false;
 
-    // Highscore aus localStorage abrufen oder initialisieren
     let highscore = localStorage.getItem('highscore') || 0;
     highscoreDisplay.textContent = `Highscore: ${highscore}`;
 
@@ -91,7 +82,7 @@
       snake.forEach((segment, index) => {
         ctx.beginPath();
         ctx.arc(segment.x + gridSize / 2, segment.y + gridSize / 2, gridSize / 2, 0, Math.PI * 2);
-        ctx.fillStyle = index === 0 ? 'white' : 'lime'; // Kopf ist weiß
+        ctx.fillStyle = index === 0 ? 'white' : 'lime';
         ctx.fill();
       });
     }
@@ -148,7 +139,7 @@
     }
 
     function showGameOverScreen() {
-      finalScoreDisplay.textContent = `Final Score: ${score}`; // Zeige den finalen Punktestand
+      finalScoreDisplay.textContent = `Final Score: ${score}`;
       gameOverScreen.style.display = 'block';
     }
 
@@ -174,16 +165,27 @@
       gameLoop = setInterval(gameTick, 100);
     }
 
+    // Event listener for keyboard input with prevention of 180-degree turns
     document.addEventListener('keydown', e => {
       if (e.key === 'p') {
         isPaused = !isPaused;
         return;
       }
 
-      if (e.key === 'ArrowUp' && dy === 0) { dx = 0; dy = -gridSize; }
-      if (e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = gridSize; }
-      if (e.key === 'ArrowLeft' && dx === 0) { dx = -gridSize; dy = 0; }
-      if (e.key === 'ArrowRight' && dx === 0) { dx = gridSize; dy = 0; }
+      // Prevent 180-degree turns by checking the current direction
+      if (e.key === 'ArrowUp' && dy === 0) {
+        dx = 0;
+        dy = -gridSize;
+      } else if (e.key === 'ArrowDown' && dy === 0) {
+        dx = 0;
+        dy = gridSize;
+      } else if (e.key === 'ArrowLeft' && dx === 0) {
+        dx = -gridSize;
+        dy = 0;
+      } else if (e.key === 'ArrowRight' && dx === 0) {
+        dx = gridSize;
+        dy = 0;
+      }
     });
 
     restartGame();
