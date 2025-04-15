@@ -119,7 +119,13 @@
       food = { x, y };
     }
 
+    let nextDirection = { dx: gridSize, dy: 0 }; // Holds the next valid direction
+
     function moveSnake() {
+      // Apply the next direction on each game tick
+      dx = nextDirection.dx;
+      dy = nextDirection.dy;
+
       const newHead = { x: snake[0].x + dx, y: snake[0].y + dy };
       snake.unshift(newHead);
 
@@ -191,18 +197,15 @@
         return;
       }
 
+      // Update nextDirection based on key press if it's not a 180-degree turn
       if (e.key === 'ArrowUp' && dy === 0) {
-        dx = 0;
-        dy = -gridSize;
+        nextDirection = { dx: 0, dy: -gridSize };
       } else if (e.key === 'ArrowDown' && dy === 0) {
-        dx = 0;
-        dy = gridSize;
+        nextDirection = { dx: 0, dy: gridSize };
       } else if (e.key === 'ArrowLeft' && dx === 0) {
-        dx = -gridSize;
-        dy = 0;
+        nextDirection = { dx: -gridSize, dy: 0 };
       } else if (e.key === 'ArrowRight' && dx === 0) {
-        dx = gridSize;
-        dy = 0;
+        nextDirection = { dx: gridSize, dy: 0 };
       }
     });
 
