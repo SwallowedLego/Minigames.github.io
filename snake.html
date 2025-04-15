@@ -19,8 +19,8 @@
     canvas {
       background-color: #222;
       display: block;
-      width: 100%;
-      height: auto;
+      /* Canvas wird mittig im Bildschirm ausgerichtet */
+      margin: auto;
     }
 
     #score, #highscore {
@@ -78,10 +78,14 @@
     let highscore = localStorage.getItem('highscore') || 0;
     highscoreDisplay.textContent = `Highscore: ${highscore}`;
 
-    // Dynamische Canvas-Größe basierend auf der Fenstergröße
+    // Dynamische Canvas-Größe, aber nicht fullscreen
     function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = Math.floor(window.innerWidth * 0.8); // 80% der Fensterbreite
+      canvas.height = Math.floor(window.innerHeight * 0.8); // 80% der Fensterhöhe
+
+      // Canvas mittig ausrichten
+      canvas.style.marginTop = `${Math.floor(window.innerHeight * 0.1)}px`; // 10% Abstand oben
+      canvas.style.marginLeft = `${Math.floor(window.innerWidth * 0.1)}px`; // 10% Abstand links
     }
 
     // Event-Listener für die Größenänderung des Fensters
