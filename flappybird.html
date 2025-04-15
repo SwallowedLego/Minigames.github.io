@@ -19,13 +19,67 @@
       background-color: #222;
       display: block;
     }
+
+    #score, #highscore {
+      position: absolute;
+      top: 15px;
+      left: 20px;
+      color: white;
+      font-size: 20px;
+    }
+
+    #highscore {
+      top: 40px; /* Position highscore below the score */
+    }
+
+    #gameOverScreen {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 30px;
+      border-radius: 10px;
+      display: none;
+      text-align: center;
+    }
+
+    #gameOverScreen button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #countdown {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 50px;
+      font-weight: bold;
+      display: none;
+    }
   </style>
 </head>
 <body>
   <canvas id="flappyCanvas"></canvas>
+  <div id="score">Score: 0</div>
+  <div id="highscore">Highscore: 0</div>
+  <div id="countdown">3</div>
+  <div id="gameOverScreen">
+    <h2>Game Over</h2>
+    <div id="finalScore"></div>
+    <button onclick="restartGame()">Play Again</button>
+  </div>
   <script>
     const canvas = document.getElementById('flappyCanvas');
     const ctx = canvas.getContext('2d');
+    const scoreDisplay = document.getElementById('score');
+    const highscoreDisplay = document.getElementById('highscore');
+    const gameOverScreen = document.getElementById('gameOverScreen');
+    const finalScoreDisplay = document.getElementById('finalScore');
+    const countdownDisplay = document.getElementById('countdown');
+
     const canvasWidth = 600;
     const canvasHeight = 400;
 
@@ -42,7 +96,11 @@
     const pipeSpeed = 2;
 
     let score = 0;
+    let highscore = localStorage.getItem('flappyHighscore') || 0;
     let isGameOver = false;
+    let gameStarted = false;
+
+    highscoreDisplay.textContent = `Highscore: ${highscore}`;
 
     function createPipe() {
       const pipeY = Math.floor(Math.random() * (canvasHeight - pipeGap));
@@ -88,6 +146,7 @@
         // Increment score when the bird passes a pipe
         if (pipe.x + pipeWidth === bird.x) {
           score++;
+          scoreDisplay.textContent = `Score: ${score}`;
         }
       });
 
@@ -99,14 +158,56 @@
 
     function gameOver() {
       isGameOver = true;
-      alert(`Game Over! Your score: ${score}`);
-      document.location.reload();
+      clearInterval(pipeInterval);
+      updateHighscore();
+      finalScoreDisplay.textContent = `Final Score: ${score}`;
+      gameOverScreen.style.display = 'block';
+    }
+
+    function updateHighscore() {
+      if (score > highscore) {
+        highscore = score;
+        localStorage.setItem('flappyHighscore', highscore);
+        highscoreDisplay.textContent = `Highscore: ${highscore}`;
+      }
     }
 
     function drawScore() {
       ctx.fillStyle = 'white';
       ctx.font = '20px Arial';
       ctx.fillText(`Score: ${score}`, 10, 30);
+    }
+
+    function restartGame() {
+      bird.y = 200;
+      bird.dy = 0;
+      pipes.length = 0;
+      score = 0;
+      scoreDisplay.textContent = `Score: ${score}`;
+      gameOverScreen.style.display = 'none';
+      isGameOver = false;
+      startGameWithCountdown();
+    }
+
+    function startGameWithCountdown() {
+      let countdown = 3;
+      countdownDisplay.style.display = 'block';
+      const countdownInterval = setInterval(() => {
+        countdownDisplay.textContent = countdown > 0 ? countdown : 'Go!';
+        if (countdown === 0) {
+          clearInterval(countdownInterval);
+          countdownDisplay.style.display = 'none';
+          startGame();
+        }
+        countdown--;
+      }, 1000);
+    }
+
+    function startGame() {
+      gameStarted = true;
+      createPipe();
+      pipeInterval = setInterval(createPipe, 2000);
+      gameLoop();
     }
 
     function gameLoop() {
@@ -123,15 +224,13 @@
     }
 
     document.addEventListener('keydown', e => {
-      if (e.key === ' ') {
+      if (e.key === ' ' && gameStarted && !isGameOver) {
         bird.dy = lift;
       }
     });
 
-    // Start the game
-    createPipe();
-    setInterval(createPipe, 2000);
-    gameLoop();
+    // Start the game with a countdown
+    startGameWithCountdown();
   </script>
 </body>
 </html>
