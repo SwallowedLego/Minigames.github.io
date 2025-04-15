@@ -92,7 +92,7 @@
 
     const pipes = [];
     const pipeWidth = 50;
-    const pipeGap = 120;
+    const pipeGap = 135;
     const pipeSpeed = 2;
 
     let score = 0;
@@ -189,19 +189,26 @@
       startGameWithCountdown();
     }
 
-    function startGameWithCountdown() {
-      let countdown = 3;
-      countdownDisplay.style.display = 'block';
-      const countdownInterval = setInterval(() => {
-        countdownDisplay.textContent = countdown > 0 ? countdown : 'Go!';
-        if (countdown === 0) {
-          clearInterval(countdownInterval);
-          countdownDisplay.style.display = 'none';
-          startGame();
-        }
-        countdown--;
-      }, 1000);
+function startGameWithCountdown() {
+  const countdownNumbers = ['3', '2', '1', 'Go!'];
+  let currentIndex = 0;
+
+  countdownDisplay.style.display = 'block';
+  countdownDisplay.textContent = countdownNumbers[currentIndex];
+
+  function nextCountdown() {
+    currentIndex++;
+    if (currentIndex < countdownNumbers.length) {
+      countdownDisplay.textContent = countdownNumbers[currentIndex];
+      setTimeout(nextCountdown, 1000); // Show the next number after 1 second
+    } else {
+      countdownDisplay.style.display = 'none';
+      startGame(); // Start the game after the countdown finishes
     }
+  }
+
+  setTimeout(nextCountdown, 1000); // Start the first transition after 1 second
+}
 
     function startGame() {
       gameStarted = true;
