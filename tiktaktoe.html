@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic-Tac-Toe</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #111;
+      color: white;
+      margin: 0;
+    }
+    #gameContainer {
+      text-align: center;
+    }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 5px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      background-color: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      border: 1px solid #444;
+      cursor: pointer;
+    }
+    .cell.taken {
+      cursor: not-allowed;
+    }
+    #controls {
+      margin-top: 20px;
+    }
+    #controls button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="gameContainer">
+    <h1>Tic-Tac-Toe</h1>
+    <div id="board"></div>
+    <div id="controls">
+      <button onclick="startGame('2p')">2 Spieler</button>
+      <button onclick="startGame('easy')">Leichte KI</button>
+      <button onclick="startGame('hard')">Schwere KI</button>
+      <button onclick="startGame('impossible')">Unmögliche KI</button>
+    </div>
+    <p id="status"></p>
+  </div>
+
+  <script>
+    const board = document.getElementById('board');
+    const statusDisplay = document.getElementById('status');
+    let cells, currentPlayer, gameActive, gameMode;
+
+    const winningCombinations = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+      [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+      [0, 4, 8], [2, 4, 6]             // Diagonals
+    ];
+
+    function startGame(mode) {
+      gameMode = mode;
+      gameActive = true;
+      currentPlayer = 'X';
+      board.innerHTML = '';
+      statusDisplay.textContent = `Spieler ${currentPlayer} ist am Zug`;
+
+      // Create 9 cells
+      cells = Array(9).fill(null);
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.addEventListener('click', () => handleCellClick(i));
+        board.appendChild(cell);
+      }
+    }
+
+    function handleCellClick(index) {
+      if (!gameActive || cells[index]) return;
+
+      cells[index] = currentPlayer;
+      updateBoard();
+      if (checkWin()) {
+        statusDisplay.textContent = `Spieler ${currentPlayer} gewinnt!`;
+        gameActive = false;
+        return;
+      } else if (!cells.includes(null)) {
+        statusDisplay.textContent = 'Unentschieden!';
+        gameActive = false;
+        return;
+      }
+
+      if (gameMode === '2p') {
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        statusDisplay.textContent = `Spieler ${currentPlayer} ist am Zug`;
+      } else {
+        currentPlayer = 'O';
+        statusDisplay.textContent = `KI (${currentPlayer}) ist am Zug`;
+        setTimeout(() => makeAIMove(), 500);
+      }
+    }
+
+    function makeAIMove() {
+      let move;
+      if (gameMode === 'easy') {
+        move = makeRandomMove();
+      } else if (gameMode === 'hard') {
+        move = makeStrategicMove();
+      } else if (gameMode === 'impossible') {
+        move = makeImpossibleMove();
+      }
+      handleCellClick(move);
+    }
+
+    function makeRandomMove() {
+      const availableCells = cells.map((v, i) => (v === null ? i : null)).filter(v => v !== null);
+      return availableCells[Math.floor(Math.random() * availableCells.length)];
+    }
+
+    function makeStrategicMove() {
+      // Try to win or block opponent
+      for (let combo of winningCombinations) {
+        const [a, b, c] = combo;
+        if (cells[a] === 'O' && cells[b] === 'O' && !cells[c]) return c;
+        if (cells[a] === 'O' && cells[c] === 'O' && !cells[b]) return b;
+        if (cells[b] === 'O' && cells[c] === 'O' && !cells[a]) return a;
+        if (cells[a] === 'X' && cells[b] === 'X' && !cells[c]) return c;
+        if (cells[a] === 'X' && cells[c] === 'X' && !cells[b]) return b;
+        if (cells[b] === 'X' && cells[c] === 'X' && !cells[a]) return a;
+      }
+      return makeRandomMove();
+    }
+
+    function makeImpossibleMove() {
+      // Minimax algorithm for unbeatable AI
+      function minimax(board, depth, isMaximizing) {
+        const winner = getWinner();
+        if (winner === 'X') return -10 + depth;
+        if (winner === 'O') return 10 - depth;
+        if (!board.includes(null)) return 0;
+
+        if (isMaximizing) {
+          let bestScore = -Infinity;
+          for (let i = 0; i < board.length; i++) {
+            if (!board[i]) {
+              board[i] = 'O';
+              const score = minimax(board, depth + 1, false);
+              board[i] = null;
+              bestScore = Math.max(score, bestScore);
+            }
+          }
+          return bestScore;
+        } else {
+          let bestScore = Infinity;
+          for (let i = 0; i < board.length; i++) {
+            if (!board[i]) {
+              board[i] = 'X';
+              const score = minimax(board, depth + 1, true);
+              board[i] = null;
+              bestScore = Math.min(score, bestScore);
+            }
+          }
+          return bestScore;
+        }
+      }
+
+      let bestMove;
+      let bestScore = -Infinity;
+      for (let i = 0; i < cells.length; i++) {
+        if (!cells[i]) {
+          cells[i] = 'O';
+          const score = minimax(cells, 0, false);
+          cells[i] = null;
+          if (score > bestScore) {
+            bestScore = score;
+            bestMove = i;
+          }
+        }
+      }
+      return bestMove;
+    }
+
+    function updateBoard() {
+      const cellElements = document.querySelectorAll('.cell');
+      cells.forEach((value, index) => {
+        cellElements[index].textContent = value;
+        if (value) cellElements[index].classList.add('taken');
+      });
+    }
+
+    function checkWin() {
+      for (let combo of winningCombinations) {
+        const [a, b, c] = combo;
+        if (cells[a] && cells[a] === cells[b] && cells[a] === cells[c]) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function getWinner() {
+      for (let combo of winningCombinations) {
+        const [a, b, c] = combo;
+        if (cells[a] && cells[a] === cells[b] && cells[a] === cells[c]) {
+          return cells[a];
+        }
+      }
+      return null;
+    }
+  </script>
+</body>
+</html>
