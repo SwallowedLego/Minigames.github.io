@@ -80,13 +80,9 @@
     let isPaused = false;
     let isInvincible = false;
 
-    // Konami-Code Setup
-    const konamiCode = [
-      'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 
-      'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 
-      'b', 'a'
-    ];
-    let konamiIndex = 0;
+    // Neuer Aktivierungscode
+    const activationCode = ['ArrowUp', 'ArrowDown', 'ArrowUp', 'ArrowDown', 'ArrowRight'];
+    let activationIndex = 0;
 
     // Retrieve highscore from localStorage or initialize it
     let highscore = localStorage.getItem('highscore') || 0;
@@ -188,16 +184,25 @@
     }
 
     document.addEventListener('keydown', e => {
-      // Überprüfe Konami-Code-Eingabe
-      if (e.key === konamiCode[konamiIndex]) {
-        konamiIndex++;
-        if (konamiIndex === konamiCode.length) {
-          isInvincible = !isInvincible; // Unbesiegbarkeitsmodus umschalten
-          alert(`Unbesiegbarkeitsmodus ${isInvincible ? 'aktiviert' : 'deaktiviert'}!`);
-          konamiIndex = 0; // Zurücksetzen für erneute Eingabe
+      if (isPaused) {
+        // Prüfe Aktivierungscode nur im pausierten Zustand
+        if (e.key === activationCode[activationIndex]) {
+          activationIndex++;
+          if (activationIndex === activationCode.length) {
+            isInvincible = !isInvincible; // Unbesiegbarkeitsmodus umschalten
+            alert(`Unbesiegbarkeitsmodus ${isInvincible ? 'aktiviert' : 'deaktiviert'}!`);
+            activationIndex = 0; // Zurücksetzen für erneute Eingabe
+          }
+        } else {
+          activationIndex = 0; // Zurücksetzen, wenn die Eingabe nicht übereinstimmt
         }
-      } else {
-        konamiIndex = 0; // Zurücksetzen, wenn die Eingabe nicht übereinstimmt
+        return; // Ignoriere andere Tasten im pausierten Zustand
+      }
+
+      // Pausieren/Fortsetzen
+      if (e.key === 'p') {
+        isPaused = !isPaused;
+        return;
       }
 
       // Verhindere 180-Grad-Wendungen
