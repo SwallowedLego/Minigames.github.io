@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Flappy Bird</title>
   <style>
     body {
@@ -18,6 +19,8 @@
     canvas {
       background-color: #222;
       display: block;
+      width: 100%; /* Canvas passt sich an die Breite des Bildschirms an */
+      height: auto; /* Höhe wird dynamisch skaliert */
     }
 
     #score, #highscore {
@@ -80,11 +83,13 @@
     const finalScoreDisplay = document.getElementById('finalScore');
     const countdownDisplay = document.getElementById('countdown');
 
-    const canvasWidth = 600;
-    const canvasHeight = 400;
-
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
+    // Dynamische Canvas-Größe basierend auf der Bildschirmgröße
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas(); // Initiale Größenanpassung
 
     const bird = { x: 50, y: 200, width: 20, height: 20, dy: 0 };
     const gravity = 0.5;
@@ -103,8 +108,8 @@
     highscoreDisplay.textContent = `Highscore: ${highscore}`;
 
     function createPipe() {
-      const pipeY = Math.floor(Math.random() * (canvasHeight - pipeGap));
-      pipes.push({ x: canvasWidth, y: pipeY });
+      const pipeY = Math.floor(Math.random() * (canvas.height - pipeGap));
+      pipes.push({ x: canvas.width, y: pipeY });
     }
 
     function drawBird() {
@@ -116,7 +121,7 @@
       ctx.fillStyle = 'green';
       pipes.forEach(pipe => {
         ctx.fillRect(pipe.x, 0, pipeWidth, pipe.y); // Top pipe
-        ctx.fillRect(pipe.x, pipe.y + pipeGap, pipeWidth, canvasHeight - (pipe.y + pipeGap)); // Bottom pipe
+        ctx.fillRect(pipe.x, pipe.y + pipeGap, pipeWidth, canvas.height - (pipe.y + pipeGap)); // Bottom pipe
       });
     }
 
@@ -125,7 +130,7 @@
       bird.y += bird.dy;
 
       // Check for collision with ground or ceiling
-      if (bird.y + bird.height > canvasHeight || bird.y < 0) {
+      if (bird.y + bird.height > canvas.height || bird.y < 0) {
         gameOver();
       }
     }
@@ -172,14 +177,8 @@
       }
     }
 
-    function drawScore() {
-      ctx.fillStyle = 'white';
-      ctx.font = '20px Arial';
-      ctx.fillText(`Score: ${score}`, 10, 30);
-    }
-
     function restartGame() {
-      bird.y = 200;
+      bird.y = canvas.height / 2;
       bird.dy = 0;
       pipes.length = 0;
       score = 0;
@@ -220,12 +219,11 @@
     function gameLoop() {
       if (isGameOver) return;
 
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       moveBird();
       movePipes();
       drawBird();
       drawPipes();
-      drawScore();
 
       requestAnimationFrame(gameLoop);
     }
