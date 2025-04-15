@@ -184,6 +184,12 @@
     }
 
     document.addEventListener('keydown', e => {
+      // Pausieren/Fortsetzen
+      if (e.key === 'p') {
+        isPaused = !isPaused;
+        return; // Beende die Ausführung hier, da die Pause umgeschaltet wurde
+      }
+
       if (isPaused) {
         // Prüfe Aktivierungscode nur im pausierten Zustand
         if (e.key === activationCode[activationIndex]) {
@@ -197,12 +203,6 @@
           activationIndex = 0; // Zurücksetzen, wenn die Eingabe nicht übereinstimmt
         }
         return; // Ignoriere andere Tasten im pausierten Zustand
-      }
-
-      // Pausieren/Fortsetzen
-      if (e.key === 'p') {
-        isPaused = !isPaused;
-        return;
       }
 
       // Verhindere 180-Grad-Wendungen
