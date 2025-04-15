@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Snake Game</title>
+  <title>Game Selection</title>
   <style>
     body {
       margin: 0;
@@ -12,207 +12,30 @@
       align-items: center;
       height: 100vh;
       font-family: sans-serif;
-      overflow: hidden;
-    }
-
-    canvas {
-      background-color: #222;
-      display: block;
-    }
-
-    #score, #highscore {
-      position: absolute;
-      top: 15px;
-      left: 20px;
       color: white;
-      font-size: 20px;
+      flex-direction: column;
     }
 
-    #highscore {
-      top: 40px; /* Position highscore below the score */
-    }
-
-    #gameOverScreen {
-      position: absolute;
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 30px;
-      border-radius: 10px;
-      display: none;
-      text-align: center;
-    }
-
-    #gameOverScreen button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 16px;
+    button {
+      padding: 20px 40px;
+      margin: 20px;
+      font-size: 24px;
       cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      background-color: #444;
+      color: white;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #666;
     }
   </style>
 </head>
 <body>
-  <canvas id="gameCanvas"></canvas>
-  <div id="score">Score: 0</div>
-  <div id="highscore">Highscore: 0</div>
-  <div id="gameOverScreen">
-    <h2>Game Over</h2>
-    <div id="finalScore"></div>
-    <button onclick="restartGame()">Erneut spielen</button>
-  </div>
-
-  <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const scoreDisplay = document.getElementById('score');
-    const highscoreDisplay = document.getElementById('highscore');
-    const gameOverScreen = document.getElementById('gameOverScreen');
-    const finalScoreDisplay = document.getElementById('finalScore');
-
-    const gridSize = 20;
-    const canvasWidth = 600;
-    const canvasHeight = 400;
-    const speed = 100;
-
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-
-    let snake, dx, dy, food, score, gameLoop;
-    let isPaused = false;
-    let isInvincible = false;
-
-    // Neuer Aktivierungscode
-    const activationCode = ['ArrowUp', 'ArrowDown', 'ArrowUp', 'ArrowDown', 'ArrowRight'];
-    let activationIndex = 0;
-
-    // Retrieve highscore from localStorage or initialize it
-    let highscore = localStorage.getItem('highscore') || 0;
-    highscoreDisplay.textContent = `Highscore: ${highscore}`;
-
-    function drawSnake() {
-      snake.forEach((segment, index) => {
-        ctx.beginPath();
-        ctx.arc(segment.x + gridSize / 2, segment.y + gridSize / 2, gridSize / 2, 0, Math.PI * 2);
-        ctx.fillStyle = index === 0 ? 'white' : 'lime'; // Kopf wird weiß
-        ctx.fill();
-      });
-    }
-
-    function drawFood() {
-      ctx.beginPath();
-      ctx.arc(food.x + gridSize / 2, food.y + gridSize / 2, gridSize / 2, 0, Math.PI * 2);
-      ctx.fillStyle = 'red';
-      ctx.fill();
-    }
-
-    function spawnFood() {
-      let x, y;
-      do {
-        x = Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize;
-        y = Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize;
-      } while (snake.some(s => s.x === x && s.y === y));
-      food = { x, y };
-    }
-
-    function moveSnake() {
-      const newHead = { x: snake[0].x + dx, y: snake[0].y + dy };
-      snake.unshift(newHead);
-
-      if (newHead.x === food.x && newHead.y === food.y) {
-        score++;
-        scoreDisplay.textContent = `Score: ${score}`;
-        spawnFood();
-      } else {
-        snake.pop();
-      }
-    }
-
-    function checkCollision() {
-      const head = snake[0];
-
-      if (!isInvincible) {
-        if (
-          head.x < 0 || head.y < 0 ||
-          head.x >= canvas.width || head.y >= canvas.height ||
-          snake.slice(1).some(seg => seg.x === head.x && seg.y === head.y)
-        ) {
-          clearInterval(gameLoop);
-          updateHighscore();
-          showGameOverScreen(); // Zeige den Game-Over-Bildschirm
-        }
-      } else {
-        // Stoppen an Wänden im Unbesiegbarkeitsmodus
-        if (head.x < 0 || head.y < 0 || head.x >= canvas.width || head.y >= canvas.height) {
-          dx = 0;
-          dy = 0; // Bewegung stoppen
-        }
-      }
-    }
-
-    function updateHighscore() {
-      if (score > highscore) {
-        highscore = score;
-        localStorage.setItem('highscore', highscore); // Save new highscore in localStorage
-        highscoreDisplay.textContent = `Highscore: ${highscore}`; // Update the highscore display
-      }
-    }
-
-    function showGameOverScreen() {
-      finalScoreDisplay.textContent = `Final Score: ${score}`; // Zeige den finalen Punktestand
-      gameOverScreen.style.display = 'block';
-    }
-
-    function gameTick() {
-      if (isPaused) return; // Überspringen, wenn pausiert
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      moveSnake();
-      checkCollision();
-      drawFood();
-      drawSnake();
-    }
-
-    function restartGame() {
-      snake = [{ x: 200, y: 200 }];
-      dx = gridSize;
-      dy = 0;
-      score = 0;
-      scoreDisplay.textContent = `Score: ${score}`;
-      spawnFood();
-      gameOverScreen.style.display = 'none';
-      clearInterval(gameLoop);
-      gameLoop = setInterval(gameTick, speed);
-    }
-
-    document.addEventListener('keydown', e => {
-      // Pausieren/Fortsetzen
-      if (e.key === 'p') {
-        isPaused = !isPaused;
-        return; // Beende die Ausführung hier, da die Pause umgeschaltet wurde
-      }
-
-      if (isPaused) {
-        // Prüfe Aktivierungscode nur im pausierten Zustand
-        if (e.key === activationCode[activationIndex]) {
-          activationIndex++;
-          if (activationIndex === activationCode.length) {
-            isInvincible = !isInvincible; // Unbesiegbarkeitsmodus umschalten
-            alert(`Unbesiegbarkeitsmodus ${isInvincible ? 'aktiviert' : 'deaktiviert'}!`);
-            activationIndex = 0; // Zurücksetzen für erneute Eingabe
-          }
-        } else {
-          activationIndex = 0; // Zurücksetzen, wenn die Eingabe nicht übereinstimmt
-        }
-        return; // Ignoriere andere Tasten im pausierten Zustand
-      }
-
-      // Verhindere 180-Grad-Wendungen
-      if (e.key === 'ArrowUp' && dy === 0) { dx = 0; dy = -gridSize; }
-      if (e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = gridSize; }
-      if (e.key === 'ArrowLeft' && dx === 0) { dx = -gridSize; dy = 0; }
-      if (e.key === 'ArrowRight' && dx === 0) { dx = gridSize; dy = 0; }
-    });
-
-    restartGame();
-  </script>
+  <h1>Choose Your Game</h1>
+  <button onclick="location.href='snake.html'">Snake</button>
+  <button onclick="location.href='flappybird.html'">Flappy Bird</button>
 </body>
 </html>
