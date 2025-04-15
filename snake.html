@@ -154,7 +154,11 @@
     }
 
     function restartGame() {
-      snake = [{ x: 200, y: 200 }];
+      // Initialize the snake in the center of the canvas
+      const startX = Math.floor(canvas.width / 2 / gridSize) * gridSize;
+      const startY = Math.floor(canvas.height / 2 / gridSize) * gridSize;
+
+      snake = [{ x: startX, y: startY }];
       dx = gridSize;
       dy = 0;
       score = 0;
@@ -185,6 +189,33 @@
       } else if (e.key === 'ArrowRight' && dx === 0) {
         dx = gridSize;
         dy = 0;
+      }
+    });
+
+    // Add touch support for mobile devices
+    document.addEventListener('touchstart', e => {
+      const touchX = e.touches[0].clientX;
+      const touchY = e.touches[0].clientY;
+
+      const head = snake[0];
+      if (Math.abs(touchX - head.x) > Math.abs(touchY - head.y)) {
+        // Horizontal swipe
+        if (touchX > head.x && dx === 0) {
+          dx = gridSize;
+          dy = 0;
+        } else if (touchX < head.x && dx === 0) {
+          dx = -gridSize;
+          dy = 0;
+        }
+      } else {
+        // Vertical swipe
+        if (touchY > head.y && dy === 0) {
+          dx = 0;
+          dy = gridSize;
+        } else if (touchY < head.y && dy === 0) {
+          dx = 0;
+          dy = -gridSize;
+        }
       }
     });
 
