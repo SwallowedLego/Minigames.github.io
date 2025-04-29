@@ -8,6 +8,7 @@
     html, body {
       height: 100%;
       margin: 0;
+      overflow: hidden; /* Verhindert Scrollen */
     }
 
     body {
@@ -20,46 +21,66 @@
       font-family: Arial, sans-serif;
     }
 
+    #scoreboard {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: white;
+    }
+
     #message {
       font-size: 24px;
       margin-bottom: 10px;
     }
 
     canvas {
+      display: block;
+      margin: auto;
       border: 2px solid white;
     }
   </style>
 </head>
 <body>
+  <!-- Scoreboard -->
+  <div id="scoreboard">
+    <span id="score-left">0</span> : <span id="score-right">0</span>
+  </div>
   <div id="message"></div>
   <canvas width="750" height="585" id="game" style="display: none;"></canvas>
   <script>
     const messageDiv = document.getElementById('message');
     const canvas = document.getElementById('game');
+    const scoreLeft = document.getElementById('score-left');
+    const scoreRight = document.getElementById('score-right');
 
-    // Function to check if the device has a keyboard
+    let leftScore = 0;
+    let rightScore = 0;
+
+    // Funktion zum Aktualisieren des Scores
+    function updateScore() {
+      scoreLeft.textContent = leftScore;
+      scoreRight.textContent = rightScore;
+    }
+
+    // Funktion, um die Tastatureingabe zu überprüfen
     function checkForKeyboardSupport() {
       let keyboardSupported = false;
 
-      // Use a temporary event listener to detect keyboard input
       function keyboardListener(event) {
         keyboardSupported = true;
         document.removeEventListener('keydown', keyboardListener);
         startGame();
       }
 
-      // If no keyboard event is detected within a short time, assume no keyboard
       const timeout = setTimeout(() => {
         if (!keyboardSupported) {
-          messageDiv.textContent = 'A keyboard is required to play this game.Press any Key to start the game';
+          messageDiv.textContent = 'A keyboard is required to play this game. Press any Key to start the game';
         }
       }, 1000); // Check for 1 second
 
-      // Add a temporary event listener
       document.addEventListener('keydown', keyboardListener);
     }
 
-    // Start the game if a keyboard is detected
     function startGame() {
       clearTimeout();
       messageDiv.textContent = '';
@@ -67,11 +88,10 @@
       initializeGame();
     }
 
-    // Initialize the Pong game
     function initializeGame() {
       const context = canvas.getContext('2d');
       const grid = 15;
-      const paddleHeight = grid * 5; // 80
+      const paddleHeight = grid * 5;
       const maxPaddleY = canvas.height - grid - paddleHeight;
 
       let paddleSpeed = 6;
@@ -138,7 +158,18 @@
           ball.dy *= -1;
         }
 
-        if (ball.x < 0 || ball.x > canvas.width) {
+        if (ball.x < 0) {
+          rightScore++;
+          updateScore();
+          ball.resetting = true;
+          setTimeout(() => {
+            ball.resetting = false;
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+          }, 400);
+        } else if (ball.x > canvas.width) {
+          leftScore++;
+          updateScore();
           ball.resetting = true;
           setTimeout(() => {
             ball.resetting = false;
@@ -182,7 +213,6 @@
       requestAnimationFrame(loop);
     }
 
-    // Run the keyboard check when the page loads
     checkForKeyboardSupport();
   </script>
 </body>
