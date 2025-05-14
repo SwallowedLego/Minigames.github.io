@@ -149,20 +149,25 @@
       ctx.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
     }
 
-    function drawPipes() {
-      pipes.forEach(pipe => {
-        // Oberes Rohr
-        ctx.drawImage(pipeUpperImg, pipe.x, 0, pipeWidth, pipe.y);
-        // Unteres Rohr
-        ctx.drawImage(
-          pipeBottomImg,
-          pipe.x,
-          pipe.y + pipeGap,
-          pipeWidth,
-          canvas.height - (pipe.y + pipeGap)
-        );
-      });
-    }
+function drawPipes() {
+  pipes.forEach(pipe => {
+    // Oberes Rohr - umgedreht
+    ctx.save();
+    ctx.translate(pipe.x + pipeWidth / 2, pipe.y); // Mittelpunkt als Referenz
+    ctx.rotate(Math.PI); // 180 Grad drehen
+    ctx.drawImage(pipeUpperImg, -pipeWidth / 2, -pipe.y, pipeWidth, pipe.y);
+    ctx.restore();
+
+    // Unteres Rohr
+    ctx.drawImage(
+      pipeBottomImg,
+      pipe.x,
+      pipe.y + pipeGap,
+      pipeWidth,
+      canvas.height - (pipe.y + pipeGap)
+    );
+  });
+}
 
     function moveBird() {
       bird.dy += gravity;
