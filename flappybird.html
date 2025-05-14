@@ -151,20 +151,32 @@
 
 function drawPipes() {
   pipes.forEach(pipe => {
-    // Oberes Rohr (umgedreht)
-    ctx.save();
-    ctx.translate(pipe.x + pipeWidth / 2, pipe.y); // Mittelpunkt als Referenz
-    ctx.rotate(Math.PI); // 180° drehen
-    ctx.drawImage(pipeUpperImg, -pipeWidth / 2, -pipe.y, pipeWidth, pipe.y);
-    ctx.restore();
+    // Unteres Rohr stapeln
+    for (let y = pipe.y + pipeGap; y < canvas.height; y += pipeBottomImg.height) {
+      ctx.drawImage(pipeBottomImg, pipe.x, y, pipeWidth, pipeBottomImg.height);
+    }
 
-    // Unteres Rohr
+    // Endstück für das untere Rohr
     ctx.drawImage(
-      pipeBottomImg,
+      pipeUpperImg,
       pipe.x,
-      pipe.y + pipeGap,
+      canvas.height - pipeBottomImg.height, // Das Endstück wird am unteren Ende des Canvas platziert
       pipeWidth,
-      canvas.height - (pipe.y + pipeGap)
+      pipeBottomImg.height
+    );
+
+    // Oberes Rohr stapeln
+    for (let y = pipe.y - pipeBottomImg.height; y >= 0; y -= pipeBottomImg.height) {
+      ctx.drawImage(pipeBottomImg, pipe.x, y, pipeWidth, pipeBottomImg.height);
+    }
+
+    // Endstück für das obere Rohr
+    ctx.drawImage(
+      pipeUpperImg,
+      pipe.x,
+      pipe.y - pipeBottomImg.height, // Das Endstück wird direkt über dem Loch platziert
+      pipeWidth,
+      pipeBottomImg.height
     );
   });
 }
