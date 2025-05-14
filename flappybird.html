@@ -1,106 +1,126 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flappy Bird</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #87CEEB;
-        }
-        #game-container {
-            position: relative;
-            width: 400px;
-            height: 600px;
-            margin: 0 auto;
-            background-color: #FFFFFF;
-            overflow: hidden;
-        }
-        #bird {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            background-color: #FF5733;
-        }
-        .pipe {
-            position: absolute;
-            width: 60px;
-            background-color: #00FF00;
-            outline: none; /* Remove outline */
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flappy Bird 3D</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #87ceeb;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
 </head>
 <body>
-    <div id="game-container">
-        <div id="bird"></div>
-        <div class="pipe" style="height: 200px; top: 0; left: 200px;"></div>
-        <div class="pipe" style="height: 300px; top: 400px; left: 300px;"></div>
-    </div>
-    <script>
-        const bird = document.getElementById("bird");
-        let birdTop = 250;
-        let birdLeft = 50;
-        let gravity = 2;
-        let gameSpeed = 2;
-        let isGameOver = false;
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+    import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
 
-        function jump() {
-            if (!isGameOver) {
-                birdTop -= 50;
-            }
+    let scene, camera, renderer;
+    let bird, pipes = [];
+    let gravity = -0.005;
+    let velocity = 0;
+    let frame = 0;
+    const pipeGap = 2.5;
+    const pipeInterval = 120;
+
+    init();
+    animate();
+
+    function init() {
+      // Szene & Kamera
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.z = 5;
+
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      // Licht
+      const light = new THREE.DirectionalLight(0xffffff, 1);
+      light.position.set(0, 1, 1);
+      scene.add(light);
+
+      // Vogel laden
+      const loader = new GLTFLoader();
+      loader.load('assets/models/bird.glb', gltf => {
+        bird = gltf.scene;
+        bird.position.set(0, 0, 0);
+        bird.scale.set(0.5, 0.5, 0.5);
+        scene.add(bird);
+      });
+
+      // Tasteneingabe
+      window.addEventListener('keydown', () => {
+        velocity = 0.08;
+      });
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+
+    function spawnPipe() {
+      const loader = new GLTFLoader();
+      const yOffset = (Math.random() - 0.5) * 3;
+
+      loader.load('assets/models/pipe.glb', gltf => {
+        const topPipe = gltf.scene.clone();
+        const bottomPipe = gltf.scene.clone();
+
+        topPipe.position.set(5, pipeGap + yOffset, 0);
+        bottomPipe.position.set(5, -pipeGap + yOffset - 2, 0);
+        topPipe.rotation.z = Math.PI;
+        topPipe.scale.set(0.6, 0.6, 0.6);
+        bottomPipe.scale.set(0.6, 0.6, 0.6);
+
+        pipes.push({ mesh: topPipe });
+        pipes.push({ mesh: bottomPipe });
+
+        scene.add(topPipe);
+        scene.add(bottomPipe);
+      });
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Bird Bewegung
+      if (bird) {
+        velocity += gravity;
+        bird.position.y += velocity;
+
+        // Game Over Bedingung
+        if (bird.position.y < -5 || bird.position.y > 5) {
+          bird.position.y = 0;
+          velocity = 0;
+          pipes.forEach(p => scene.remove(p.mesh));
+          pipes = [];
         }
+      }
 
-        document.addEventListener("keydown", jump);
+      // Pipes bewegen
+      pipes.forEach(p => {
+        p.mesh.position.x -= 0.03;
+      });
 
-        function gameLoop() {
-            if (!isGameOver) {
-                birdTop += gravity;
-                bird.style.top = birdTop + "px";
-            }
+      // Neue Pipes
+      frame++;
+      if (frame % pipeInterval === 0) {
+        spawnPipe();
+      }
 
-            if (birdTop <= 0 || birdTop >= 560) {
-                gameOver();
-            }
-
-            const pipes = document.querySelectorAll(".pipe");
-            pipes.forEach(pipe => {
-                const pipeLeft = parseInt(pipe.style.left);
-                if (pipeLeft > -60) {
-                    pipe.style.left = pipeLeft - gameSpeed + "px";
-
-                    // Check for collision
-                    if (
-                        birdLeft + 40 > pipeLeft &&
-                        birdLeft < pipeLeft + 60 &&
-                        birdTop + 40 > parseInt(pipe.style.top) &&
-                        birdTop < parseInt(pipe.style.top) + parseInt(pipe.style.height)
-                    ) {
-                        gameOver();
-                    }
-                } else {
-                    pipe.style.left = "400px";
-                }
-            });
-
-            if (!isGameOver) {
-                requestAnimationFrame(gameLoop);
-            }
-        }
-
-        function gameOver() {
-            isGameOver = true;
-            alert("Game Over! Click OK to restart.");
-            birdTop = 250;
-            isGameOver = false;
-            const pipes = document.querySelectorAll(".pipe");
-            pipes.forEach(pipe => {
-                pipe.style.left = "400px";
-            });
-        }
-
-        gameLoop();
-    </script>
+      renderer.render(scene, camera);
+    }
+  </script>
 </body>
 </html>
