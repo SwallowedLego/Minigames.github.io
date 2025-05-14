@@ -151,10 +151,10 @@
 
 function drawPipes() {
   pipes.forEach(pipe => {
-    // Oberes Rohr - umgedreht
+    // Oberes Rohr (umgedreht)
     ctx.save();
     ctx.translate(pipe.x + pipeWidth / 2, pipe.y); // Mittelpunkt als Referenz
-    ctx.rotate(Math.PI); // 180 Grad drehen
+    ctx.rotate(Math.PI); // 180° drehen
     ctx.drawImage(pipeUpperImg, -pipeWidth / 2, -pipe.y, pipeWidth, pipe.y);
     ctx.restore();
 
