@@ -2,44 +2,205 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Game Selection</title>
-  <style>
-body {
-  margin: 0;
-  background-color: #111;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  font-family: sans-serif;
-  color: white;
-  flex-direction: column;
-  padding: 20px; /* Fügt einen Puffer hinzu */
-  box-sizing: border-box; /* Verhindert Überlauf */
-}
-
-button {
-  padding: 20px 40px; /* Reduziert die Größe der Buttons */
-  margin: 10px; /* Reduziert den Abstand zwischen Buttons */
-  font-size: 30px; /* Verringert die Schriftgröße */
-  cursor: pointer;
-  border: none;
-  border-radius: 10px;
-  background-color: #444;
-  color: white;
-  transition: background-color 0.3s;
-}
-
-button:hover {
-  background-color: #666;
-}
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MinPlay - Free Online Games</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Choose Your Game</h1>
-  <button onclick="location.href='snake.html'">Snake</button>
-  <button onclick="location.href='flappybird.html'">Flappy Bird</button>
-  <button onclick="location.href='tiktaktoe.html'">Tik Tak Toe</button>
-  <button onclick="location.href='pong.html'">Pong</button>
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <h1 class="logo">🎮 MinPlay</h1>
+      <nav class="nav">
+        <button class="nav-btn active" data-category="all">All Games</button>
+        <button class="nav-btn" data-category="arcade">Arcade</button>
+        <button class="nav-btn" data-category="puzzle">Puzzle</button>
+        <button class="nav-btn" data-category="action">Action</button>
+        <button class="nav-btn" data-category="strategy">Strategy</button>
+        <button class="nav-btn" data-category="casual">Casual</button>
+      </nav>
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search games..." class="search-input">
+        <span class="search-icon">🔍</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <h2 class="hero-title">Play Amazing Free Games Online</h2>
+      <p class="hero-subtitle">Discover hundreds of fun games across all genres - no downloads required!</p>
+    </div>
+  </section>
+
+  <!-- Games Grid -->
+  <main class="main">
+    <div class="container">
+      <div class="games-stats">
+        <span id="gameCount">9+ Games Available</span>
+      </div>
+      
+      <div class="games-grid" id="gamesGrid">
+        <!-- Existing Games -->
+        <div class="game-card" data-category="arcade" data-name="snake">
+          <div class="game-thumbnail snake-bg">
+            <div class="game-overlay">
+              <button class="play-btn" onclick="location.href='snake.html'">▶ Play</button>
+            </div>
+          </div>
+          <div class="game-info">
+            <h3 class="game-title">Snake</h3>
+            <p class="game-description">Classic snake game - eat food and grow!</p>
+            <div class="game-tags">
+              <span class="tag">Arcade</span>
+              <span class="tag">Classic</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="game-card" data-category="arcade" data-name="flappy bird">
+          <div class="game-thumbnail flappy-bg">
+            <div class="game-overlay">
+              <button class="play-btn" onclick="location.href='flappybird.html'">▶ Play</button>
+            </div>
+          </div>
+          <div class="game-info">
+            <h3 class="game-title">Flappy Bird</h3>
+            <p class="game-description">Navigate through pipes in this 3D version!</p>
+            <div class="game-tags">
+              <span class="tag">Arcade</span>
+              <span class="tag">3D</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="game-card" data-category="strategy" data-name="tic tac toe">
+          <div class="game-thumbnail ttt-bg">
+            <div class="game-overlay">
+              <button class="play-btn" onclick="location.href='tiktaktoe.html'">▶ Play</button>
+            </div>
+          </div>
+          <div class="game-info">
+            <h3 class="game-title">Tic Tac Toe</h3>
+            <p class="game-description">Classic strategy game with AI opponents!</p>
+            <div class="game-tags">
+              <span class="tag">Strategy</span>
+              <span class="tag">AI</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="game-card" data-category="arcade" data-name="pong">
+          <div class="game-thumbnail pong-bg">
+            <div class="game-overlay">
+              <button class="play-btn" onclick="location.href='pong.html'">▶ Play</button>
+            </div>
+          </div>
+          <div class="game-info">
+            <h3 class="game-title">Pong</h3>
+            <p class="game-description">The original arcade tennis game!</p>
+            <div class="game-tags">
+              <span class="tag">Arcade</span>
+              <span class="tag">Classic</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Puzzle Games -->
+        <div class="game-card" data-category="puzzle" data-name="2048">
+          <div class="game-thumbnail puzzle-bg">
+            <div class="game-overlay">
+              <button class="play-btn" onclick="location.href='2048.html'">▶ Play</button>
+            </div>
+          </div>
+          <div class="game-info">
+            <h3 class="game-title">2048</h3>
+            <p class="game-description">Slide numbered tiles to create the 2048 tile!</p>
+            <div class="game-tags">
+              <span class="tag">Puzzle</span>
+              <span class="tag">Numbers</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="game-card" data-category="puzzle" data-name="memory match">
+          <div class="game-thumbnail puzzle-bg">
+            <div class="game-overlay">
+              <button class="play-btn" onclick="location.href='memory.html'">▶ Play</button>
+            </div>
+          </div>
+          <div class="game-info">
+            <h3 class="game-title">Memory Match</h3>
+            <p class="game-description">Test your memory by matching emoji pairs!</p>
+            <div class="game-tags">
+              <span class="tag">Puzzle</span>
+              <span class="tag">Memory</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Games -->
+        <div class="game-card" data-category="action" data-name="space invaders">
+          <div class="game-thumbnail action-bg">
+            <div class="game-overlay">
+              <button class="play-btn" onclick="location.href='spaceinvaders.html'">▶ Play</button>
+            </div>
+          </div>
+          <div class="game-info">
+            <h3 class="game-title">Space Invaders</h3>
+            <p class="game-description">Defend Earth from alien invaders!</p>
+            <div class="game-tags">
+              <span class="tag">Action</span>
+              <span class="tag">Shooter</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Casual Games -->
+        <div class="game-card" data-category="casual" data-name="breakout">
+          <div class="game-thumbnail casual-bg">
+            <div class="game-overlay">
+              <button class="play-btn" onclick="location.href='breakout.html'">▶ Play</button>
+            </div>
+          </div>
+          <div class="game-info">
+            <h3 class="game-title">Breakout</h3>
+            <p class="game-description">Classic brick-breaking arcade game!</p>
+            <div class="game-tags">
+              <span class="tag">Casual</span>
+              <span class="tag">Arcade</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Strategy Games -->
+        <div class="game-card" data-category="strategy" data-name="connect four">
+          <div class="game-thumbnail strategy-bg">
+            <div class="game-overlay">
+              <button class="play-btn" onclick="location.href='connect4.html'">▶ Play</button>
+            </div>
+          </div>
+          <div class="game-info">
+            <h3 class="game-title">Connect Four</h3>
+            <p class="game-description">Connect four pieces in a row to win!</p>
+            <div class="game-tags">
+              <span class="tag">Strategy</span>
+              <span class="tag">Board Game</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2024 MinPlay - Free Online Games. All games are browser-based and require no downloads.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>

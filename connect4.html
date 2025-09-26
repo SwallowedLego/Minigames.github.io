@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connect Four - MinPlay</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #2196F3, #1976D2);
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .game-container {
+      text-align: center;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .game-header {
+      margin-bottom: 30px;
+    }
+
+    .game-title {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .game-info {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .info-box {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 10px 20px;
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+    }
+
+    .info-label {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .info-value {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .current-player {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .player-red {
+      color: #ff4444;
+      text-shadow: 0 0 10px #ff4444;
+    }
+
+    .player-yellow {
+      color: #ffdd44;
+      text-shadow: 0 0 10px #ffdd44;
+    }
+
+    .game-mode-selector {
+      margin-bottom: 20px;
+    }
+
+    .mode-btn {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .mode-btn:hover,
+    .mode-btn.active {
+      background: rgba(255, 255, 255, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .game-board {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 20px;
+      margin: 20px auto;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      display: inline-block;
+    }
+
+    .board-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 60px);
+      grid-template-rows: repeat(6, 60px);
+      gap: 8px;
+      background: #1565C0;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .cell {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cell:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+    }
+
+    .cell.red {
+      background: radial-gradient(circle, #ff6666, #cc0000);
+      box-shadow: 0 0 15px rgba(255, 68, 68, 0.6);
+    }
+
+    .cell.yellow {
+      background: radial-gradient(circle, #ffff66, #cccc00);
+      box-shadow: 0 0 15px rgba(255, 221, 68, 0.6);
+    }
+
+    .cell.winning {
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .column-button {
+      width: 60px;
+      height: 30px;
+      margin: 0 4px 10px 4px;
+      border: none;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.3);
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .column-button:hover {
+      background: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .column-button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .game-controls {
+      margin-top: 20px;
+    }
+
+    .control-btn {
+      padding: 12px 24px;
+      margin: 5px;
+      border: none;
+      border-radius: 25px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .game-over {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .game-over-content {
+      background: white;
+      color: #333;
+      padding: 40px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+    }
+
+    .winner-red {
+      color: #cc0000;
+    }
+
+    .winner-yellow {
+      color: #cccc00;
+    }
+
+    @media (max-width: 600px) {
+      .board-grid {
+        grid-template-columns: repeat(7, 45px);
+        grid-template-rows: repeat(6, 45px);
+        gap: 6px;
+      }
+      .cell {
+        width: 45px;
+        height: 45px;
+      }
+      .column-button {
+        width: 45px;
+        margin: 0 3px 10px 3px;
+      }
+      .game-title {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="back-btn" onclick="location.href='index.html'">← Back to Games</button>
+  
+  <div class="game-container">
+    <div class="game-header">
+      <h1 class="game-title">Connect Four</h1>
+      <div class="game-info">
+        <div class="info-box">
+          <div class="info-label">Red Wins</div>
+          <div class="info-value" id="redWins">0</div>
+        </div>
+        <div class="info-box">
+          <div class="info-label">Yellow Wins</div>
+          <div class="info-value" id="yellowWins">0</div>
+        </div>
+        <div class="info-box">
+          <div class="info-label">Draws</div>
+          <div class="info-value" id="draws">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="current-player player-red" id="currentPlayer">
+      Red Player's Turn
+    </div>
+
+    <div class="game-mode-selector">
+      <button class="mode-btn active" onclick="setGameMode('2player')">2 Players</button>
+      <button class="mode-btn" onclick="setGameMode('ai')">vs Computer</button>
+    </div>
+
+    <div class="game-board">
+      <div class="column-buttons" id="columnButtons">
+        <!-- Column buttons will be generated by JavaScript -->
+      </div>
+      <div class="board-grid" id="gameBoard">
+        <!-- Grid cells will be generated by JavaScript -->
+      </div>
+    </div>
+
+    <div class="game-controls">
+      <button class="control-btn" onclick="newGame()">New Game</button>
+      <button class="control-btn" onclick="resetStats()">Reset Stats</button>
+    </div>
+  </div>
+
+  <div class="game-over" id="gameOver">
+    <div class="game-over-content">
+      <h2 id="gameOverTitle">Game Over!</h2>
+      <p id="gameOverMessage">Result message</p>
+      <button class="control-btn" onclick="newGame()">Play Again</button>
+      <button class="control-btn" onclick="location.href='index.html'">Back to Games</button>
+    </div>
+  </div>
+
+  <script>
+    const ROWS = 6;
+    const COLS = 7;
+    let board = [];
+    let currentPlayer = 'red';
+    let gameMode = '2player';
+    let gameActive = true;
+    let animating = false;
+
+    // Statistics
+    let stats = JSON.parse(localStorage.getItem('connect4-stats')) || {
+      redWins: 0,
+      yellowWins: 0,
+      draws: 0
+    };
+
+    function initGame() {
+      board = Array(ROWS).fill().map(() => Array(COLS).fill(null));
+      currentPlayer = 'red';
+      gameActive = true;
+      animating = false;
+      updateCurrentPlayerDisplay();
+      
+      // Create board
+      const gameBoard = document.getElementById('gameBoard');
+      gameBoard.innerHTML = '';
+      
+      for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.row = row;
+          cell.dataset.col = col;
+          gameBoard.appendChild(cell);
+        }
+      }
+      
+      // Create column buttons
+      const columnButtons = document.getElementById('columnButtons');
+      columnButtons.innerHTML = '';
+      
+      for (let col = 0; col < COLS; col++) {
+        const button = document.createElement('button');
+        button.className = 'column-button';
+        button.textContent = '↓';
+        button.onclick = () => dropPiece(col);
+        columnButtons.appendChild(button);
+      }
+      
+      updateStats();
+    }
+
+    function setGameMode(mode) {
+      gameMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      newGame();
+    }
+
+    function dropPiece(col) {
+      if (!gameActive || animating) return;
+      
+      // Find the lowest empty row in this column
+      let targetRow = -1;
+      for (let row = ROWS - 1; row >= 0; row--) {
+        if (board[row][col] === null) {
+          targetRow = row;
+          break;
+        }
+      }
+      
+      if (targetRow === -1) return; // Column is full
+      
+      animating = true;
+      board[targetRow][col] = currentPlayer;
+      
+      // Animate the piece falling
+      animateDrop(targetRow, col, () => {
+        animating = false;
+        
+        if (checkWin(targetRow, col)) {
+          endGame(currentPlayer);
+        } else if (checkDraw()) {
+          endGame('draw');
+        } else {
+          switchPlayer();
+          
+          if (gameMode === 'ai' && currentPlayer === 'yellow') {
+            setTimeout(makeAIMove, 500);
+          }
+        }
+      });
+    }
+
+    function animateDrop(targetRow, col, callback) {
+      const cell = document.querySelector(`[data-row="${targetRow}"][data-col="${col}"]`);
+      
+      // Create animated piece
+      const animatedPiece = document.createElement('div');
+      animatedPiece.className = `cell ${currentPlayer}`;
+      animatedPiece.style.position = 'absolute';
+      animatedPiece.style.top = '-60px';
+      animatedPiece.style.left = '0';
+      animatedPiece.style.zIndex = '10';
+      
+      cell.style.position = 'relative';
+      cell.appendChild(animatedPiece);
+      
+      // Animate to final position
+      setTimeout(() => {
+        animatedPiece.style.transition = 'top 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        animatedPiece.style.top = '0';
+        
+        setTimeout(() => {
+          cell.className = `cell ${currentPlayer}`;
+          cell.removeChild(animatedPiece);
+          cell.style.position = '';
+          updateColumnButtons();
+          callback();
+        }, 500);
+      }, 50);
+    }
+
+    function updateColumnButtons() {
+      const buttons = document.querySelectorAll('.column-button');
+      buttons.forEach((button, col) => {
+        const isColumnFull = board[0][col] !== null;
+        button.disabled = isColumnFull || !gameActive;
+      });
+    }
+
+    function switchPlayer() {
+      currentPlayer = currentPlayer === 'red' ? 'yellow' : 'red';
+      updateCurrentPlayerDisplay();
+    }
+
+    function updateCurrentPlayerDisplay() {
+      const display = document.getElementById('currentPlayer');
+      if (gameMode === '2player') {
+        display.textContent = `${currentPlayer === 'red' ? 'Red' : 'Yellow'} Player's Turn`;
+      } else {
+        display.textContent = currentPlayer === 'red' ? 'Your Turn' : 'Computer Thinking...';
+      }
+      display.className = `current-player player-${currentPlayer}`;
+    }
+
+    function makeAIMove() {
+      if (!gameActive || currentPlayer !== 'yellow') return;
+      
+      // Simple AI: Try to win, then block, then random
+      let bestCol = findWinningMove('yellow');
+      if (bestCol === -1) {
+        bestCol = findWinningMove('red'); // Block player
+      }
+      if (bestCol === -1) {
+        bestCol = getRandomMove();
+      }
+      
+      if (bestCol !== -1) {
+        dropPiece(bestCol);
+      }
+    }
+
+    function findWinningMove(player) {
+      for (let col = 0; col < COLS; col++) {
+        const tempBoard = board.map(row => [...row]);
+        
+        // Find where piece would land
+        let row = -1;
+        for (let r = ROWS - 1; r >= 0; r--) {
+          if (tempBoard[r][col] === null) {
+            row = r;
+            break;
+          }
+        }
+        
+        if (row === -1) continue; // Column full
+        
+        tempBoard[row][col] = player;
+        
+        if (checkWinOnBoard(tempBoard, row, col, player)) {
+          return col;
+        }
+      }
+      return -1;
+    }
+
+    function getRandomMove() {
+      const availableCols = [];
+      for (let col = 0; col < COLS; col++) {
+        if (board[0][col] === null) {
+          availableCols.push(col);
+        }
+      }
+      return availableCols.length > 0 ? availableCols[Math.floor(Math.random() * availableCols.length)] : -1;
+    }
+
+    function checkWin(row, col) {
+      return checkWinOnBoard(board, row, col, currentPlayer);
+    }
+
+    function checkWinOnBoard(boardToCheck, row, col, player) {
+      const directions = [
+        [0, 1],   // horizontal
+        [1, 0],   // vertical
+        [1, 1],   // diagonal /
+        [1, -1]   // diagonal \
+      ];
+      
+      for (let [dx, dy] of directions) {
+        let count = 1; // Include the piece just placed
+        
+        // Check in positive direction
+        let r = row + dx, c = col + dy;
+        while (r >= 0 && r < ROWS && c >= 0 && c < COLS && boardToCheck[r][c] === player) {
+          count++;
+          r += dx;
+          c += dy;
+        }
+        
+        // Check in negative direction
+        r = row - dx;
+        c = col - dy;
+        while (r >= 0 && r < ROWS && c >= 0 && c < COLS && boardToCheck[r][c] === player) {
+          count++;
+          r -= dx;
+          c -= dy;
+        }
+        
+        if (count >= 4) {
+          if (boardToCheck === board) {
+            highlightWinningPieces(row, col, dx, dy, player);
+          }
+          return true;
+        }
+      }
+      
+      return false;
+    }
+
+    function highlightWinningPieces(row, col, dx, dy, player) {
+      const winningCells = [{row, col}];
+      
+      // Find all winning pieces in this direction
+      let r = row + dx, c = col + dy;
+      while (r >= 0 && r < ROWS && c >= 0 && c < COLS && board[r][c] === player) {
+        winningCells.push({row: r, col: c});
+        r += dx;
+        c += dy;
+      }
+      
+      r = row - dx;
+      c = col - dy;
+      while (r >= 0 && r < ROWS && c >= 0 && c < COLS && board[r][c] === player) {
+        winningCells.push({row: r, col: c});
+        r -= dx;
+        c -= dy;
+      }
+      
+      // Highlight winning pieces
+      winningCells.forEach(cell => {
+        const element = document.querySelector(`[data-row="${cell.row}"][data-col="${cell.col}"]`);
+        element.classList.add('winning');
+      });
+    }
+
+    function checkDraw() {
+      return board[0].every(cell => cell !== null);
+    }
+
+    function endGame(winner) {
+      gameActive = false;
+      
+      const title = document.getElementById('gameOverTitle');
+      const message = document.getElementById('gameOverMessage');
+      
+      if (winner === 'draw') {
+        title.textContent = 'It\'s a Draw!';
+        message.textContent = 'The board is full with no winner.';
+        stats.draws++;
+      } else {
+        if (gameMode === '2player') {
+          title.textContent = `${winner === 'red' ? 'Red' : 'Yellow'} Player Wins!`;
+          title.className = `winner-${winner}`;
+        } else {
+          title.textContent = winner === 'red' ? 'You Win!' : 'Computer Wins!';
+          title.className = `winner-${winner}`;
+        }
+        message.textContent = `Congratulations! Four in a row!`;
+        
+        if (winner === 'red') {
+          stats.redWins++;
+        } else {
+          stats.yellowWins++;
+        }
+      }
+      
+      localStorage.setItem('connect4-stats', JSON.stringify(stats));
+      updateStats();
+      
+      setTimeout(() => {
+        document.getElementById('gameOver').style.display = 'flex';
+      }, 1000);
+    }
+
+    function updateStats() {
+      document.getElementById('redWins').textContent = stats.redWins;
+      document.getElementById('yellowWins').textContent = stats.yellowWins;
+      document.getElementById('draws').textContent = stats.draws;
+    }
+
+    function newGame() {
+      document.getElementById('gameOver').style.display = 'none';
+      initGame();
+    }
+
+    function resetStats() {
+      if (confirm('Reset all statistics?')) {
+        stats = { redWins: 0, yellowWins: 0, draws: 0 };
+        localStorage.setItem('connect4-stats', JSON.stringify(stats));
+        updateStats();
+      }
+    }
+
+    // Initialize game
+    initGame();
+  </script>
+</body>
+</html>
