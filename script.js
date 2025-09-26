@@ -63,10 +63,14 @@ function searchGames(searchTerm) {
         const gameName = card.dataset.name.toLowerCase();
         const gameTitle = card.querySelector('.game-title').textContent.toLowerCase();
         const gameDescription = card.querySelector('.game-description').textContent.toLowerCase();
+        const gameCategory = card.dataset.category.toLowerCase();
+        const gameTags = Array.from(card.querySelectorAll('.tag')).map(tag => tag.textContent.toLowerCase()).join(' ');
         
         if (gameName.includes(searchTerm) || 
             gameTitle.includes(searchTerm) || 
-            gameDescription.includes(searchTerm)) {
+            gameDescription.includes(searchTerm) ||
+            gameCategory.includes(searchTerm) ||
+            gameTags.includes(searchTerm)) {
             card.style.display = 'block';
             card.classList.add('fade-in');
         } else {

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simon Says - MinPlay</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #FFEB3B, #FBC02D);
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .game-container {
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .game-header {
+      margin-bottom: 30px;
+    }
+
+    .game-title {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      color: #333;
+    }
+
+    .game-stats {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat-box {
+      background: rgba(0, 0, 0, 0.1);
+      padding: 10px 20px;
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+      color: #333;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .game-message {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 30px;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #333;
+    }
+
+    .simon-board {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      padding: 30px;
+      margin: 20px auto;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      width: 320px;
+      height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .simon-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 140px);
+      grid-template-rows: repeat(2, 140px);
+      gap: 20px;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .simon-button {
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 2rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.8);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .simon-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .simon-button.red {
+      background: linear-gradient(135deg, #ff4444, #cc0000);
+      border-top-left-radius: 100px;
+    }
+
+    .simon-button.blue {
+      background: linear-gradient(135deg, #4444ff, #0000cc);
+      border-top-right-radius: 100px;
+    }
+
+    .simon-button.green {
+      background: linear-gradient(135deg, #44ff44, #00cc00);
+      border-bottom-left-radius: 100px;
+    }
+
+    .simon-button.yellow {
+      background: linear-gradient(135deg, #ffff44, #cccc00);
+      border-bottom-right-radius: 100px;
+    }
+
+    .simon-button:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    .simon-button.active {
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+      filter: brightness(1.3);
+    }
+
+    .center-circle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      z-index: 10;
+    }
+
+    .game-controls {
+      margin-top: 30px;
+    }
+
+    .control-btn {
+      padding: 12px 24px;
+      margin: 5px;
+      border: none;
+      border-radius: 25px;
+      background: rgba(0, 0, 0, 0.1);
+      color: #333;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .control-btn:hover {
+      background: rgba(0, 0, 0, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .control-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .game-over {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .game-over-content {
+      background: white;
+      color: #333;
+      padding: 40px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+    }
+
+    @media (max-width: 600px) {
+      .simon-board {
+        width: 280px;
+        height: 280px;
+        padding: 20px;
+      }
+      .simon-grid {
+        grid-template-columns: repeat(2, 120px);
+        grid-template-rows: repeat(2, 120px);
+        gap: 15px;
+      }
+      .center-circle {
+        width: 60px;
+        height: 60px;
+        font-size: 10px;
+      }
+      .game-title {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="back-btn" onclick="location.href='index.html'">← Back to Games</button>
+  
+  <div class="game-container">
+    <div class="game-header">
+      <h1 class="game-title">Simon Says</h1>
+      <div class="game-stats">
+        <div class="stat-box">
+          <div class="stat-label">Score</div>
+          <div class="stat-value" id="score">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Level</div>
+          <div class="stat-value" id="level">1</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Best</div>
+          <div class="stat-value" id="bestScore">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-message" id="gameMessage">
+      Press "Start Game" to begin!
+    </div>
+
+    <div class="simon-board">
+      <div class="simon-grid">
+        <button class="simon-button red" id="btn-0" onclick="playerInput(0)">1</button>
+        <button class="simon-button blue" id="btn-1" onclick="playerInput(1)">2</button>
+        <button class="simon-button green" id="btn-2" onclick="playerInput(2)">3</button>
+        <button class="simon-button yellow" id="btn-3" onclick="playerInput(3)">4</button>
+      </div>
+      <div class="center-circle">
+        SIMON<br>SAYS
+      </div>
+    </div>
+
+    <div class="game-controls">
+      <button class="control-btn" id="startBtn" onclick="startGame()">Start Game</button>
+      <button class="control-btn" onclick="showInstructions()">How to Play</button>
+    </div>
+  </div>
+
+  <div class="game-over" id="gameOver">
+    <div class="game-over-content">
+      <h2>Game Over!</h2>
+      <p id="gameOverStats">Final Score: 0</p>
+      <button class="control-btn" onclick="startGame()">Play Again</button>
+      <button class="control-btn" onclick="location.href='index.html'">Back to Games</button>
+    </div>
+  </div>
+
+  <script>
+    let sequence = [];
+    let playerSequence = [];
+    let level = 1;
+    let score = 0;
+    let gameActive = false;
+    let showingSequence = false;
+    let playerTurn = false;
+    let bestScore = localStorage.getItem('simon-best') || 0;
+
+    const colors = ['red', 'blue', 'green', 'yellow'];
+    const sounds = {
+      0: 261.63, // C4
+      1: 329.63, // E4
+      2: 392.00, // G4
+      3: 523.25  // C5
+    };
+
+    // Initialize
+    document.getElementById('bestScore').textContent = bestScore;
+
+    function startGame() {
+      sequence = [];
+      playerSequence = [];
+      level = 1;
+      score = 0;
+      gameActive = true;
+      showingSequence = false;
+      playerTurn = false;
+      
+      updateUI();
+      document.getElementById('gameOver').style.display = 'none';
+      document.getElementById('startBtn').disabled = true;
+      
+      nextLevel();
+    }
+
+    function nextLevel() {
+      playerSequence = [];
+      playerTurn = false;
+      
+      // Add new color to sequence
+      sequence.push(Math.floor(Math.random() * 4));
+      
+      updateMessage('Watch the sequence...');
+      showSequence();
+    }
+
+    function showSequence() {
+      showingSequence = true;
+      disableButtons();
+      
+      let i = 0;
+      const showNext = () => {
+        if (i < sequence.length) {
+          setTimeout(() => {
+            flashButton(sequence[i]);
+            i++;
+            setTimeout(showNext, 600);
+          }, 200);
+        } else {
+          showingSequence = false;
+          playerTurn = true;
+          enableButtons();
+          updateMessage('Repeat the sequence!');
+        }
+      };
+      
+      showNext();
+    }
+
+    function flashButton(buttonIndex) {
+      const button = document.getElementById(`btn-${buttonIndex}`);
+      button.classList.add('active');
+      playSound(buttonIndex);
+      
+      setTimeout(() => {
+        button.classList.remove('active');
+      }, 400);
+    }
+
+    function playerInput(buttonIndex) {
+      if (!playerTurn || showingSequence) return;
+      
+      flashButton(buttonIndex);
+      playerSequence.push(buttonIndex);
+      
+      // Check if input matches sequence so far
+      const currentIndex = playerSequence.length - 1;
+      if (playerSequence[currentIndex] !== sequence[currentIndex]) {
+        gameOver();
+        return;
+      }
+      
+      // Check if player completed the sequence
+      if (playerSequence.length === sequence.length) {
+        score += level * 10;
+        level++;
+        updateUI();
+        
+        if (level <= 20) {
+          updateMessage('Correct! Next level...');
+          setTimeout(nextLevel, 1500);
+        } else {
+          winGame();
+        }
+      }
+    }
+
+    function gameOver() {
+      gameActive = false;
+      playerTurn = false;
+      disableButtons();
+      
+      updateMessage('Wrong! Game Over!');
+      
+      if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem('simon-best', bestScore);
+        document.getElementById('bestScore').textContent = bestScore;
+      }
+      
+      setTimeout(() => {
+        document.getElementById('gameOverStats').textContent = `Final Score: ${score} | Level Reached: ${level - 1}`;
+        document.getElementById('gameOver').style.display = 'flex';
+        document.getElementById('startBtn').disabled = false;
+      }, 1500);
+    }
+
+    function winGame() {
+      gameActive = false;
+      playerTurn = false;
+      disableButtons();
+      
+      updateMessage('Amazing! You completed all levels!');
+      score += 500; // Bonus for completing all levels
+      
+      if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem('simon-best', bestScore);
+        document.getElementById('bestScore').textContent = bestScore;
+      }
+      
+      setTimeout(() => {
+        document.getElementById('gameOverStats').textContent = `Congratulations! Final Score: ${score}`;
+        document.getElementById('gameOver').style.display = 'flex';
+        document.getElementById('startBtn').disabled = false;
+      }, 2000);
+    }
+
+    function updateMessage(message) {
+      document.getElementById('gameMessage').textContent = message;
+    }
+
+    function updateUI() {
+      document.getElementById('score').textContent = score;
+      document.getElementById('level').textContent = level;
+    }
+
+    function disableButtons() {
+      colors.forEach((color, index) => {
+        document.getElementById(`btn-${index}`).disabled = true;
+      });
+    }
+
+    function enableButtons() {
+      colors.forEach((color, index) => {
+        document.getElementById(`btn-${index}`).disabled = false;
+      });
+    }
+
+    function playSound(buttonIndex) {
+      // Create audio context for sound
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = sounds[buttonIndex];
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+    }
+
+    function showInstructions() {
+      alert(`HOW TO PLAY SIMON SAYS:
+
+🎵 Watch the sequence of colored buttons light up
+🎯 Repeat the sequence by clicking the buttons in the same order
+📈 Each level adds one more step to the sequence
+🏆 Complete all 20 levels to win!
+
+Tips:
+• Pay attention to both the colors and sounds
+• Take your time - there's no rush
+• The sequence gets longer each round
+
+Good luck! 🎮`);
+    }
+
+    // Initialize buttons as disabled
+    disableButtons();
+  </script>
+</body>
+</html>

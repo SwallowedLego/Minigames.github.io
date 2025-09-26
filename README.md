@@ -2,25 +2,26 @@
 
 A comprehensive collection of fun, browser-based minigames similar to CrazyGames. Play instantly without downloads!
 
-## 🎮 Available Games
+## 🎮 Available Games (10 Total)
 
-### Arcade Games
+### Arcade Games (3)
 - **Snake** - Classic snake game with modern controls
 - **Flappy Bird** - 3D version of the popular mobile game
 - **Pong** - The original arcade tennis game
 
-### Puzzle Games
+### Puzzle Games (3)
 - **2048** - Slide numbered tiles to reach 2048
 - **Memory Match** - Test your memory with emoji matching
 - **Tic Tac Toe** - Classic strategy game with multiple AI difficulties
 
-### Action Games
+### Action Games (1)
 - **Space Invaders** - Retro alien shooter with neon graphics
 
-### Casual Games
+### Casual Games (2)
 - **Breakout** - Classic brick-breaking game
+- **Simon Says** - Remember and repeat color sequences
 
-### Strategy Games
+### Strategy Games (1)
 - **Connect Four** - Connect four pieces in a row to win
 
 ## 🌟 Features
