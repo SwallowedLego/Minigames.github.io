@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Game - MinPlay</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .quiz-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      flex: 1;
+    }
+
+    .quiz-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .quiz-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .main-menu {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 40px;
+      backdrop-filter: blur(10px);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .menu-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+
+    .menu-btn {
+      background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+      border: none;
+      color: white;
+      padding: 15px 30px;
+      font-size: 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: bold;
+      min-width: 150px;
+    }
+
+    .menu-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .menu-btn.secondary {
+      background: linear-gradient(45deg, #4834d4, #686de0);
+    }
+
+    .quiz-form {
+      display: none;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+    }
+
+    .quiz-code-display {
+      display: none;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .quiz-code {
+      font-size: 3rem;
+      font-weight: bold;
+      background: linear-gradient(45deg, #feca57, #ff9ff3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 20px 0;
+      letter-spacing: 8px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .quiz-info {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 15px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+
+    .quiz-waiting {
+      display: none;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    .participants-list {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .participant {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px 15px;
+      margin: 5px 0;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .quiz-game {
+      display: none;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+    }
+
+    .question-container {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .question {
+      font-size: 1.5rem;
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .answer-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 16px;
+    }
+
+    .answer-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .answer-btn.selected {
+      background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+      border-color: #00d2ff;
+    }
+
+    .answer-btn.correct {
+      background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+      border-color: #56ab2f;
+    }
+
+    .answer-btn.incorrect {
+      background: linear-gradient(45deg, #ff416c, #ff4b2b);
+      border-color: #ff416c;
+    }
+
+    .timer {
+      font-size: 1.2rem;
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .score-board {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .back-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 600px) {
+      .quiz-container {
+        padding: 10px;
+      }
+      
+      .menu-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .quiz-code {
+        font-size: 2rem;
+        letter-spacing: 4px;
+      }
+      
+      .answers {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="back-btn" onclick="location.href='index.html'">← Back to Games</button>
+  
+  <div class="quiz-container">
+    <div class="quiz-header">
+      <h1>🧠 Quiz Game</h1>
+      <p>Create or join quiz rooms with friends!</p>
+    </div>
+
+    <!-- Main Menu -->
+    <div class="main-menu" id="mainMenu">
+      <h2>Welcome to Quiz Game!</h2>
+      <div class="menu-buttons">
+        <button class="menu-btn" onclick="showCreateQuiz()">Create Quiz</button>
+        <button class="menu-btn secondary" onclick="showJoinQuiz()">Join Quiz</button>
+      </div>
+    </div>
+
+    <!-- Create Quiz Form -->
+    <div class="quiz-form" id="createQuizForm">
+      <h2>Create New Quiz</h2>
+      <div class="form-group">
+        <label for="hostName">Your Name:</label>
+        <input type="text" id="hostName" placeholder="Enter your name" maxlength="20">
+      </div>
+      <div class="form-group">
+        <label for="quizTitle">Quiz Title:</label>
+        <input type="text" id="quizTitle" placeholder="Enter quiz title" maxlength="50">
+      </div>
+      <div class="menu-buttons">
+        <button class="menu-btn" onclick="createQuiz()">Create Quiz</button>
+        <button class="menu-btn secondary" onclick="showMainMenu()">Back</button>
+      </div>
+    </div>
+
+    <!-- Join Quiz Form -->
+    <div class="quiz-form" id="joinQuizForm">
+      <h2>Join Quiz</h2>
+      <div class="form-group">
+        <label for="playerName">Your Name:</label>
+        <input type="text" id="playerName" placeholder="Enter your name" maxlength="20">
+      </div>
+      <div class="form-group">
+        <label for="quizCode">Quiz Code:</label>
+        <input type="text" id="quizCode" placeholder="Enter 6-digit code" maxlength="6" style="text-transform: uppercase;">
+      </div>
+      <div class="menu-buttons">
+        <button class="menu-btn" onclick="joinQuiz()">Join Quiz</button>
+        <button class="menu-btn secondary" onclick="showMainMenu()">Back</button>
+      </div>
+    </div>
+
+    <!-- Quiz Code Display (Host) -->
+    <div class="quiz-code-display" id="quizCodeDisplay">
+      <h2>Quiz Created Successfully!</h2>
+      <p>Share this code with players:</p>
+      <div class="quiz-code" id="displayCode">ABC123</div>
+      <div class="quiz-info">
+        <p><strong>Quiz:</strong> <span id="displayTitle">Sample Quiz</span></p>
+        <p><strong>Host:</strong> <span id="displayHost">Host Name</span></p>
+      </div>
+      <div class="menu-buttons">
+        <button class="menu-btn" onclick="startQuiz()">Start Quiz</button>
+        <button class="menu-btn secondary" onclick="showMainMenu()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Waiting Room -->
+    <div class="quiz-waiting" id="waitingRoom">
+      <h2>Waiting for Quiz to Start...</h2>
+      <div class="quiz-info">
+        <p><strong>Quiz:</strong> <span id="waitingTitle">Sample Quiz</span></p>
+        <p><strong>Code:</strong> <span id="waitingCode">ABC123</span></p>
+      </div>
+      <div class="participants-list">
+        <h3>Participants (<span id="participantCount">0</span>):</h3>
+        <div id="participantsList">
+          <!-- Participants will be added here -->
+        </div>
+      </div>
+      <div class="menu-buttons">
+        <button class="menu-btn secondary" onclick="leaveQuiz()">Leave Quiz</button>
+      </div>
+    </div>
+
+    <!-- Quiz Game -->
+    <div class="quiz-game" id="quizGameContainer">
+      <div class="timer" id="timer">Time: 30s</div>
+      <div class="question-container">
+        <div class="question" id="questionText">What is the capital of France?</div>
+        <div class="answers" id="answersContainer">
+          <!-- Answer buttons will be generated here -->
+        </div>
+      </div>
+      <div class="score-board">
+        <p><strong>Score:</strong> <span id="playerScore">0</span> points</p>
+        <p><strong>Question:</strong> <span id="questionNumber">1</span> of <span id="totalQuestions">10</span></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Game state
+    let gameState = {
+      isHost: false,
+      quizCode: '',
+      playerName: '',
+      quizTitle: '',
+      participants: [],
+      currentQuestionIndex: 0,
+      score: 0,
+      timeLeft: 30,
+      timer: null,
+      isAnswered: false
+    };
+
+    // Sample quiz questions
+    const quizQuestions = [
+      {
+        question: "What is the capital of France?",
+        answers: ["London", "Berlin", "Paris", "Madrid"],
+        correct: 2
+      },
+      {
+        question: "Which planet is known as the Red Planet?",
+        answers: ["Venus", "Mars", "Jupiter", "Saturn"],
+        correct: 1
+      },
+      {
+        question: "What is 2 + 2?",
+        answers: ["3", "4", "5", "6"],
+        correct: 1
+      },
+      {
+        question: "Who painted the Mona Lisa?",
+        answers: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Michelangelo"],
+        correct: 2
+      },
+      {
+        question: "What is the largest ocean on Earth?",
+        answers: ["Atlantic", "Indian", "Arctic", "Pacific"],
+        correct: 3
+      },
+      {
+        question: "Which year did World War II end?",
+        answers: ["1944", "1945", "1946", "1947"],
+        correct: 1
+      },
+      {
+        question: "What is the chemical symbol for gold?",
+        answers: ["Go", "Gd", "Au", "Ag"],
+        correct: 2
+      },
+      {
+        question: "Which country is home to the kangaroo?",
+        answers: ["New Zealand", "Australia", "South Africa", "Brazil"],
+        correct: 1
+      },
+      {
+        question: "What is the fastest land animal?",
+        answers: ["Lion", "Cheetah", "Leopard", "Tiger"],
+        correct: 1
+      },
+      {
+        question: "How many continents are there?",
+        answers: ["5", "6", "7", "8"],
+        correct: 2
+      }
+    ];
+
+    // Generate random quiz code
+    function generateQuizCode() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = '';
+      for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    // Show different screens
+    function showMainMenu() {
+      hideAllScreens();
+      document.getElementById('mainMenu').style.display = 'block';
+      resetGameState();
+    }
+
+    function showCreateQuiz() {
+      hideAllScreens();
+      document.getElementById('createQuizForm').style.display = 'block';
+    }
+
+    function showJoinQuiz() {
+      hideAllScreens();
+      document.getElementById('joinQuizForm').style.display = 'block';
+    }
+
+    function hideAllScreens() {
+      const screens = ['mainMenu', 'createQuizForm', 'joinQuizForm', 'quizCodeDisplay', 'waitingRoom', 'quizGameContainer'];
+      screens.forEach(screen => {
+        document.getElementById(screen).style.display = 'none';
+      });
+    }
+
+    function resetGameState() {
+      gameState = {
+        isHost: false,
+        quizCode: '',
+        playerName: '',
+        quizTitle: '',
+        participants: [],
+        currentQuestionIndex: 0,
+        score: 0,
+        timeLeft: 30,
+        timer: null,
+        isAnswered: false
+      };
+      if (gameState.timer) {
+        clearInterval(gameState.timer);
+      }
+    }
+
+    // Create quiz functionality
+    function createQuiz() {
+      const hostName = document.getElementById('hostName').value.trim();
+      const quizTitle = document.getElementById('quizTitle').value.trim();
+      
+      if (!hostName) {
+        alert('Please enter your name');
+        return;
+      }
+      
+      if (!quizTitle) {
+        alert('Please enter a quiz title');
+        return;
+      }
+      
+      gameState.isHost = true;
+      gameState.playerName = hostName;
+      gameState.quizTitle = quizTitle;
+      gameState.quizCode = generateQuizCode();
+      gameState.participants = [{ name: hostName, isHost: true, score: 0 }];
+      
+      // Display the quiz code
+      document.getElementById('displayCode').textContent = gameState.quizCode;
+      document.getElementById('displayTitle').textContent = quizTitle;
+      document.getElementById('displayHost').textContent = hostName;
+      
+      hideAllScreens();
+      document.getElementById('quizCodeDisplay').style.display = 'block';
+      
+      // Simulate some players joining (for demonstration)
+      setTimeout(() => addParticipant('Player1', false), 2000);
+      setTimeout(() => addParticipant('Player2', false), 4000);
+    }
+
+    // Join quiz functionality
+    function joinQuiz() {
+      const playerName = document.getElementById('playerName').value.trim();
+      const quizCode = document.getElementById('quizCode').value.trim().toUpperCase();
+      
+      if (!playerName) {
+        alert('Please enter your name');
+        return;
+      }
+      
+      if (!quizCode || quizCode.length !== 6) {
+        alert('Please enter a valid 6-digit code');
+        return;
+      }
+      
+      // In a real implementation, this would check if the code exists on a server
+      // For this demo, we'll accept any 6-character code
+      gameState.isHost = false;
+      gameState.playerName = playerName;
+      gameState.quizCode = quizCode;
+      gameState.quizTitle = "Sample Quiz"; // This would come from the server
+      
+      // Show waiting room
+      document.getElementById('waitingTitle').textContent = gameState.quizTitle;
+      document.getElementById('waitingCode').textContent = quizCode;
+      
+      hideAllScreens();
+      document.getElementById('waitingRoom').style.display = 'block';
+      
+      // Add self to participants
+      addParticipant(playerName, false);
+      
+      // Simulate the quiz starting after a delay
+      setTimeout(() => {
+        if (!gameState.isHost) {
+          startQuizGame();
+        }
+      }, 5000);
+    }
+
+    function addParticipant(name, isHost) {
+      const participant = { name, isHost, score: 0 };
+      gameState.participants.push(participant);
+      updateParticipantsList();
+    }
+
+    function updateParticipantsList() {
+      const listContainer = document.getElementById('participantsList');
+      const countElement = document.getElementById('participantCount');
+      
+      listContainer.innerHTML = '';
+      gameState.participants.forEach(participant => {
+        const div = document.createElement('div');
+        div.className = 'participant';
+        div.innerHTML = `
+          <span>${participant.name} ${participant.isHost ? '(Host)' : ''}</span>
+          <span>${participant.score} pts</span>
+        `;
+        listContainer.appendChild(div);
+      });
+      
+      countElement.textContent = gameState.participants.length;
+    }
+
+    // Start quiz functionality
+    function startQuiz() {
+      if (!gameState.isHost) return;
+      startQuizGame();
+    }
+
+    function startQuizGame() {
+      hideAllScreens();
+      document.getElementById('quizGameContainer').style.display = 'block';
+      gameState.currentQuestionIndex = 0;
+      gameState.score = 0;
+      showQuestion();
+    }
+
+    function showQuestion() {
+      if (gameState.currentQuestionIndex >= quizQuestions.length) {
+        showResults();
+        return;
+      }
+      
+      const question = quizQuestions[gameState.currentQuestionIndex];
+      gameState.isAnswered = false;
+      gameState.timeLeft = 30;
+      
+      document.getElementById('questionText').textContent = question.question;
+      document.getElementById('questionNumber').textContent = gameState.currentQuestionIndex + 1;
+      document.getElementById('totalQuestions').textContent = quizQuestions.length;
+      document.getElementById('playerScore').textContent = gameState.score;
+      
+      // Create answer buttons
+      const answersContainer = document.getElementById('answersContainer');
+      answersContainer.innerHTML = '';
+      
+      question.answers.forEach((answer, index) => {
+        const button = document.createElement('button');
+        button.className = 'answer-btn';
+        button.textContent = answer;
+        button.onclick = () => selectAnswer(index);
+        answersContainer.appendChild(button);
+      });
+      
+      // Start timer
+      startTimer();
+    }
+
+    function selectAnswer(answerIndex) {
+      if (gameState.isAnswered) return;
+      
+      gameState.isAnswered = true;
+      clearInterval(gameState.timer);
+      
+      const question = quizQuestions[gameState.currentQuestionIndex];
+      const buttons = document.querySelectorAll('.answer-btn');
+      
+      // Show correct/incorrect answers
+      buttons.forEach((button, index) => {
+        button.onclick = null; // Disable clicking
+        if (index === question.correct) {
+          button.classList.add('correct');
+        } else if (index === answerIndex && index !== question.correct) {
+          button.classList.add('incorrect');
+        }
+      });
+      
+      // Update score
+      if (answerIndex === question.correct) {
+        const timeBonus = Math.max(0, Math.floor(gameState.timeLeft / 3));
+        gameState.score += 100 + timeBonus;
+        document.getElementById('playerScore').textContent = gameState.score;
+      }
+      
+      // Move to next question after delay
+      setTimeout(() => {
+        gameState.currentQuestionIndex++;
+        showQuestion();
+      }, 3000);
+    }
+
+    function startTimer() {
+      const timerElement = document.getElementById('timer');
+      
+      gameState.timer = setInterval(() => {
+        timerElement.textContent = `Time: ${gameState.timeLeft}s`;
+        gameState.timeLeft--;
+        
+        if (gameState.timeLeft < 0) {
+          clearInterval(gameState.timer);
+          if (!gameState.isAnswered) {
+            selectAnswer(-1); // Time's up, no answer selected
+          }
+        }
+      }, 1000);
+    }
+
+    function showResults() {
+      alert(`Quiz Complete!\nFinal Score: ${gameState.score} points\n\nThanks for playing!`);
+      showMainMenu();
+    }
+
+    function leaveQuiz() {
+      if (confirm('Are you sure you want to leave the quiz?')) {
+        showMainMenu();
+      }
+    }
+
+    // Initialize the game
+    showMainMenu();
+
+    // Handle input formatting
+    document.getElementById('quizCode').addEventListener('input', function(e) {
+      e.target.value = e.target.value.toUpperCase();
+    });
+  </script>
+</body>
+</html>
